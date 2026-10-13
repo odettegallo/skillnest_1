@@ -9,7 +9,7 @@ load_dotenv()
 client = genai.Client()
 
 response = client.models.generate_content(
-    model="gemini-3.8-flash",
+    model="gemini-3.5-flash-lite",
     contents="Hola, probando la conexión con mi archivo .env",
 )
 
