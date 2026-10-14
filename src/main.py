@@ -5,6 +5,8 @@ from google import genai
 # Carga las variables del archivo .env
 load_dotenv()
 
+print(os.getenv("GEMINI_API_KEY") is not None)
+
 # Inicializa el cliente (detectará automáticamente GEMINI_API_KEY)
 client = genai.Client()
 
