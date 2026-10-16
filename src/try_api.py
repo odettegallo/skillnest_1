@@ -18,4 +18,4 @@ def test_api_connection(question):
     }
     answer = requests.post(url, json=body, headers={"Authorization": f"Bearer {api_key}"})
     return answer.json()["results"][0]["content"][0]["text"]
-    
+    print(test_api_connection("Hola, probando la conexión con mi archivo .env"))
