@@ -5,38 +5,54 @@ from dotenv import load_dotenv
 # Carga las variables del archivo .env
 load_dotenv()
 
-def test_api_connection(question):
+# --- Responsabilidad 1: Construir la petición (URL y Body) ---
+def construir_peticion(pregunta):
     api_key = os.getenv("GEMINI_API_KEY")
-    model = "gemini-3.5-flash-lite"  # O "gemini-3.5-flash-lite" según te exijan
+    model = "gemini-3.5-flash-lite"  # O el modelo que te exijan en el bootcamp
     
-    # La API de Gemini espera la key como parámetro en la URL
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     
-    # Estructura JSON correcta que exige Google Generative Language API
     body = {
         "contents": [
             {
                 "parts": [
-                    {"text": question}
+                    {"text": pregunta}
                 ]
             }
         ]
     }
-    
-    # Hacemos la petición POST (sin cabecera Bearer, la key va en la URL)
-    answer = requests.post(url, json=body)
-    
-    # Parseamos la respuesta JSON
-    data = answer.json()
-    
-    # Manejo de errores por si la API rechaza la petición
-    if "candidates" not in data:
-        return f"Error en la respuesta de la API: {data}"
-        
-    # Extracción correcta del texto dentro de la respuesta de Google
-    return data["candidates"][0]["content"]["parts"][0]["text"]
+    return url, body
 
-# ESTO ES LO QUE FALTABA: Llamar a la función fuera de su definición para que se ejecute e imprima
+
+# --- Responsabilidad 2: Enviar la petición a la API ---
+def enviar_peticion(url, body):
+    respuesta = requests.post(url, json=body)
+    return respuesta.json()
+
+
+# --- Responsabilidad 3: Extraer el texto de la respuesta ---
+def extraer_texto(datos_json):
+    if "candidates" not in datos_json:
+        return f"Error en la respuesta de la API: {datos_json}"
+        
+    return datos_json["candidates"][0]["content"]["parts"][0]["text"]
+
+
+# --- Función Orquestadora (Une las 3 responsabilidades) ---
+def test_api_connection(pregunta):
+    # 1. Construimos
+    url, body = construir_peticion(pregunta)
+    
+    # 2. Enviamos
+    datos_respuesta = enviar_peticion(url, body)
+    
+    # 3. Extraemos el resultado final
+    texto_final = extraer_texto(datos_respuesta)
+    
+    return texto_final
+
+
+# Ejecución del programa
 if __name__ == "__main__":
     resultado = test_api_connection("Hola, probando la conexión con mi archivo .env")
     print(resultado)
