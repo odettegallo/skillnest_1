@@ -19,3 +19,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Ignorar pruebas y archivos de prueba
+pruebas/
