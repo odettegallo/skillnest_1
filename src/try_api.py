@@ -34,7 +34,7 @@ def construir_peticion(pregunta, modelo):
             }
         ],
         "generationConfig": {
-            "maxOutputTokens": 100 # Controlamos el consumo en pruebas
+            "maxOutputTokens": 1000 # Controlamos el consumo en pruebas
         }
     }
     return url, body
@@ -98,6 +98,21 @@ def extraer_texto(datos_json):
     except (KeyError, IndexError) as e:
         raise RuntimeError(f"La estructura de la respuesta cambió o está incompleta (Faltó el campo: {e}).")
 
+# --- Función corregida para calcular costos ---
+def calcular_costo(datos_json, precio_entrada, precio_salida):
+    """
+    Calcula el costo aproximado de la consulta extrayendo los tokens
+    desde 'usageMetadata' según la estructura oficial de la API de Gemini.
+    """
+    try:
+        uso = datos_json["usageMetadata"]
+        tokens_entrada = uso["promptTokenCount"]
+        tokens_salida = uso["candidatesTokenCount"]
+        
+        costo_total = (tokens_entrada * precio_entrada) + (tokens_salida * precio_salida)
+        return costo_total
+    except KeyError as e:
+        raise RuntimeError(f"No se pudo calcular el costo debido a la falta del campo en usageMetadata: {e}")
 
 # --- Función Orquestadora ---
 def test_api_connection(pregunta):
@@ -106,14 +121,25 @@ def test_api_connection(pregunta):
     
     # 3. Extraemos el resultado final
     texto_final = extraer_texto(datos_respuesta)
-    
+
+    try:
+        # Ejemplo: $0.075 por millón de entrada ($0.000000075 por token)
+        precio_ent = 0.000000075 
+        # Ejemplo: $0.30 por millón de salida ($0.0000003 por token)
+        precio_sal = 0.0000003    
+        
+        costo = calcular_costo(datos_respuesta, precio_ent, precio_sal)
+        print(f" 💰 Costo estimado de la consulta: ${costo:.8f} USD")
+    except Exception as ex:
+        print(f" ⚠️ No se pudo calcular el costo: {ex}")
+            
     return texto_final
 
 
 # Ejecución del programa con un bloque try-except robusto a nivel global
 if __name__ == "__main__":
     try:
-        pregunta_prueba = "Responde únicamente con la palabra: OK"
+        pregunta_prueba = "Responde con la frase del día"
         print(f"Enviando consulta: '{pregunta_prueba}'\n")
         
         resultado = test_api_connection(pregunta_prueba)
