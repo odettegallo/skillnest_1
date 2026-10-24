@@ -39,6 +39,12 @@ def construir_peticion(pregunta, modelo):
     }
     return url, body
 
+def enviar_peticion(pregunta, modelo):
+    """Envía la petición a un modelo específico sin bucles infinitos."""
+    url, body = construir_peticion(pregunta, modelo)
+    respuesta = requests.post(url, json=body, timeout=30)
+    respuesta.raise_for_status()
+    return respuesta.json()
 
 # --- Responsabilidad 2: Enviar la petición con resiliencia ---
 def enviar_peticion_con_fallback(pregunta, modelos=MODELOS_DISPONIBLES, retries=2):
