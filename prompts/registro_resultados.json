@@ -1,0 +1,10 @@
+{
+  "clasificar_sentimiento": {
+    "exitos": 3,
+    "intentos": 3
+  },
+  "extraer_entidades_soporte": {
+    "exitos": 3,
+    "intentos": 3
+  }
+}
