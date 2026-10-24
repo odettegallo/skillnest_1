@@ -1,18 +1,13 @@
 import os
+import re
+import json
 import time
 import requests
 from dotenv import load_dotenv
+from config import MODELOS_DISPONIBLES, BANCO_DE_PROMPTS
 
 # Carga las variables del archivo .env
 load_dotenv()
-
-# Lista de modelos en orden de respaldo (Fallback)
-MODELOS_DISPONIBLES = [
-    "gemini-3.5-flash",
-    "gemini-3.5-flash-lite",
-    "gemini-2.5-flash",
-    "gemini-3.8-flash"
-]
 
 # --- Responsabilidad 1: Construir la petición ---
 def construir_peticion(pregunta, modelo):
@@ -25,7 +20,7 @@ def construir_peticion(pregunta, modelo):
         
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{modelo}:generateContent?key={api_key}"
     
-    body = {
+    body = {        
         "contents": [
             {
                 "parts": [
