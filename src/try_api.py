@@ -73,6 +73,25 @@ def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_sch
                     print(f"   ⚠️ Cuota excedida (429) en {modelo}. Reintento {intento}/{retries}...")
                 elif respuesta.status_code == 503:
                     print(f"   ⚠️ Servicio no disponible (503) en {modelo}. Reintento {intento}/{retries}...")
+                elif 400 <= respuesta.status_code <= 403:
+                    # Validar si el error se debe a una API Key incorrecta o inválida
+                    try:
+                        error_json = respuesta.json()
+                        error_mensaje = error_json.get("error", {}).get("message", "").lower()
+                        if "api key" in error_mensaje or "key not valid" in error_mensaje or respuesta.status_code in (401, 403):
+                            raise ValueError(f"La GEMINI_API_KEY es incorrecta o no es válida: {error_json.get('error', {}).get('message')}")
+                    except json.JSONDecodeError:
+                        pass
+                    respuesta.raise_for_status()
+                    # Validar si el error se debe a una API Key incorrecta o inválida
+                    try:
+                        error_json = respuesta.json()
+                        error_mensaje = error_json.get("error", {}).get("message", "").lower()
+                        if "api key" in error_mensaje or "key not valid" in error_mensaje or respuesta.status_code == 403:
+                            raise ValueError(f"La GEMINI_API_KEY es incorrecta o no es válida: {error_json.get('error', {}).get('message')}")
+                    except json.JSONDecodeError:
+                        pass
+                    respuesta.raise_for_status()
                 else:
                     respuesta.raise_for_status()
                     try:
