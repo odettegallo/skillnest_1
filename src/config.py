@@ -7,6 +7,14 @@ MODELOS_DISPONIBLES = [
     "gemini-3.8-flash"
 ]
 
+# Tarifas oficiales o referenciales (Precios por millón de tokens en USD)
+TARIFAS_MODELOS = {
+    "gemini-3.5-flash": {"entrada": 0.075, "salida": 0.30},
+    "gemini-3.5-flash-lite": {"entrada": 0.0375, "salida": 0.15},
+    "gemini-2.5-flash": {"entrada": 0.075, "salida": 0.30},
+    "gemini-3.8-flash": {"entrada": 0.10, "salida": 0.40},
+}
+
 # Banco de prompts estructurado para pruebas automáticas
 BANCO_DE_PROMPTS = [
     {

@@ -4,7 +4,7 @@ import json
 import time
 import requests
 from dotenv import load_dotenv
-from config import MODELOS_DISPONIBLES, BANCO_DE_PROMPTS
+from config import MODELOS_DISPONIBLES, BANCO_DE_PROMPTS, TARIFAS_MODELOS
 
 # Carga las variables del archivo .env
 load_dotenv()
@@ -57,7 +57,6 @@ def enviar_peticion(pregunta, modelo):
     return respuesta.json()
 
 # --- Responsabilidad 2: Enviar la petición con resiliencia y Fallback ---
-# --- Responsabilidad 2: Enviar la petición con resiliencia y Fallback ---
 def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_schema=None, modelos=MODELOS_DISPONIBLES, retries=2):
     for modelo in modelos:
         print(f"🔄 Intentando conectar con el modelo: {modelo}...")
@@ -103,11 +102,14 @@ def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_sch
                     try:
                         datos = respuesta.json()
                         print(f"   ✅ ¡Conexión exitosa con {modelo}!")
+                        
+                        # Registramos el costo de inmediato usando las tarifas del archivo config
+                        registrar_costo(datos, modelo)
+                        
                         return datos
                     except requests.exceptions.JSONDecodeError:
                         raise RuntimeError(
-                            f"El servidor de {modelo} respondió con un JSON corrupto o"
-                            " inválido."
+                            f"El servidor de {modelo} respondió con un JSON corrupto o inválido."
                         )
 
             except requests.exceptions.RequestException as e:
@@ -162,6 +164,36 @@ def calcular_costo(datos_json, precio_entrada, precio_salida):
     except KeyError as e:
         raise RuntimeError(f"No se pudo calcular el costo debido a la falta del campo en usageMetadata: {e}")
 
+# Variable global para acumular el costo de la sesión actual
+costo_total_sesion = 0.0
+
+def registrar_costo(datos_json: dict, modelo: str) -> float:
+    """Extrae el conteo de tokens de usageMetadata, busca la tarifa por millón 
+    del modelo correspondiente en TARIFAS_MODELOS y acumula el costo de la sesión.
+    """
+    global costo_total_sesion
+    try:
+        uso = datos_json.get("usageMetadata", {})
+        tokens_entrada = uso.get("promptTokenCount", 0)
+        tokens_salida = uso.get("candidatesTokenCount", 0)
+        
+        # Obtenemos las tarifas del modelo (por defecto usamos gemini-2.5-flash si no se encuentra)
+        tarifas = TARIFAS_MODELOS.get(modelo, {"entrada": 0.075, "salida": 0.30})
+        
+        precio_entrada_por_token = tarifas["entrada"] / 1_000_000
+        precio_salida_por_token = tarifas["salida"] / 1_000_000
+        
+        costo_estimado = (tokens_entrada * precio_entrada_por_token) + (tokens_salida * precio_salida_por_token)
+        costo_total_sesion += costo_estimado
+        
+        print(f"   📊 [{modelo}] Tokens -> Entrada: {tokens_entrada}, Salida: {tokens_salida}")
+        print(f"      Costo operación: ${costo_estimado:.6f} USD (Acumulado sesión: ${costo_total_sesion:.6f} USD)")
+        
+        return costo_estimado
+    except Exception as e:
+        print(f"   ⚠️ No se pudo registrar el costo: {e}")
+        return 0.0
+
 # --- Función Orquestadora del Banco de Pruebas ---
 def ejecutar_banco_de_prompts():
     # Aseguramos que exista la carpeta 'prompts'
@@ -211,23 +243,11 @@ def ejecutar_banco_de_prompts():
 
 # --- Función Orquestadora ---
 def test_api_connection(pregunta):
-    # 1 y 2 combinados con lógica de fallback y reintentos
+    # La función ya se encarga de enviar, aplicar fallback y registrar el costo automáticamente
     datos_respuesta = enviar_peticion_con_fallback(pregunta)
     
     # 3. Extraemos el resultado final
     texto_final = extraer_texto(datos_respuesta)
-
-    try:
-        # Ejemplo: $0.075 por millón de entrada ($0.000000075 por token)
-        precio_ent = 0.000000075 
-        # Ejemplo: $0.30 por millón de salida ($0.0000003 por token)
-        precio_sal = 0.0000003    
-        
-        costo = calcular_costo(datos_respuesta, precio_ent, precio_sal)
-        print(f" 💰 Costo estimado de la consulta: ${costo:.8f} USD")
-    except Exception as ex:
-        print(f" ⚠️ No se pudo calcular el costo: {ex}")
-            
     return texto_final
 
 
