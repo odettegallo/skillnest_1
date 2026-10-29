@@ -80,6 +80,8 @@ def test_con_reintento_no_reintenta_value_error():
 
 def test_registrar_costo_acumula():
     """Verifica que el registro de costos sume correctamente en la variable global de sesión."""
+    # Reseteamos el estado global al inicio para evitar contaminación entre pruebas
+    try_api.costo_total_sesion = 0.0
     datos_simulados = {
         "usageMetadata": {
             "promptTokenCount": 1_000,
