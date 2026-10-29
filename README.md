@@ -196,6 +196,15 @@ prompts/registro_resultados.json
 ✅ Generación automática de evidencias en archivo de resultados.
 
 ---
+## Registro del ensayo de rate limit y costos
+
+- **Fecha:** 2026-10-28
+- **Peticiones enviadas:** 5 solicitudes de prueba + evaluación del banco de prompts
+- **Petición donde apareció el primer 429 / fallback:** En la Solicitud #1 (`gemini-3.5-flash` agotó sus reintentos por cuota excedida y aplicó fallback exitoso a `gemini-3.5-flash-lite`).
+- **Esperas observadas:** 2.94s, 4.49s (backoff exponencial con jitter y memoria inteligente de modelo funcionando correctamente).
+- **Costo total del ensayo:** $0.00020 USD
+- **Resultado:** Las peticiones completaron su ciclo con éxito tras el respaldo, la estructura de los JSONs fue validada correctamente y el registro final se exportó de forma automatizada en `prompts/registro_resultados.json`.
+
 
 ## Conclusión
 
