@@ -2,6 +2,7 @@ import os
 import re
 import json
 import time
+import random
 import requests
 from dotenv import load_dotenv
 from config import MODELOS_DISPONIBLES, BANCO_DE_PROMPTS, TARIFAS_MODELOS
@@ -57,9 +58,10 @@ def enviar_peticion(pregunta, modelo):
     return respuesta.json()
 
 # --- Responsabilidad 2: Enviar la petición con resiliencia y Fallback ---
-def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_schema=None, modelos=MODELOS_DISPONIBLES, retries=2):
+def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_schema=None, modelos=MODELOS_DISPONIBLES, retries=3):
     for modelo in modelos:
         print(f"🔄 Intentando conectar con el modelo: {modelo}...")
+        
         try:
             url, body = construir_peticion(pregunta, modelo, system_instruction, response_schema)
         except ValueError as ve:
@@ -69,67 +71,50 @@ def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_sch
             try:
                 respuesta = requests.post(url, json=body, timeout=30)
 
-                if respuesta.status_code == 429:
-                    print(
-                        f"   ⚠️ Cuota excedida (429) en {modelo}. Reintento"
-                        f" {intento}/{retries}..."
-                    )
-                elif respuesta.status_code == 503:
-                    print(
-                        f"   ⚠️ Servicio no disponible (503) en {modelo}. Reintento"
-                        f" {intento}/{retries}..."
-                    )
-                elif 400 <= respuesta.status_code <= 403:
+                # Si es un error de cliente insalvable (API Key inválida, etc.)
+                if 400 <= respuesta.status_code <= 403:
                     try:
                         error_json = respuesta.json()
-                        error_mensaje = (
-                            error_json.get("error", {}).get("message", "").lower()
-                        )
-                        if (
-                            "api key" in error_mensaje
-                            or "key not valid" in error_mensaje
-                            or respuesta.status_code in (401, 403)
-                        ):
-                            raise ValueError(
-                                "La GEMINI_API_KEY es incorrecta o no es válida:"
-                                f" {error_json.get('error', {}).get('message')}"
-                            )
+                        error_mensaje = error_json.get("error", {}).get("message", "").lower()
+                        if "api key" in error_mensaje or "key not valid" in error_mensaje or respuesta.status_code in (401, 403):
+                            raise ValueError(f"La GEMINI_API_KEY es incorrecta o no es válida: {error_json.get('error', {}).get('message')}")
                     except json.JSONDecodeError:
                         pass
                     respuesta.raise_for_status()
+
+                if respuesta.status_code == 429:
+                    print(f"   ⚠️ Cuota excedida (429) en {modelo}. Reintento {intento}/{retries}...")
+                elif respuesta.status_code == 503:
+                    print(f"   ⚠️ Servicio no disponible (503) en {modelo}. Reintento {intento}/{retries}...")
                 else:
                     respuesta.raise_for_status()
+                    
                     try:
                         datos = respuesta.json()
                         print(f"   ✅ ¡Conexión exitosa con {modelo}!")
                         
-                        # Registramos el costo de inmediato usando las tarifas del archivo config
+                        # Registramos el costo de inmediato de forma segura
                         registrar_costo(datos, modelo)
                         
                         return datos
                     except requests.exceptions.JSONDecodeError:
-                        raise RuntimeError(
-                            f"El servidor de {modelo} respondió con un JSON corrupto o inválido."
-                        )
+                        raise RuntimeError(f"El servidor de {modelo} respondió con un JSON corrupto o inválido.")
 
             except requests.exceptions.RequestException as e:
-                print(
-                    f"   ⚠️ Error de red/conexión con {modelo} (Intento"
-                    f" {intento}/{retries}): {e}"
-                )
+                print(f"   ⚠️ Error de red/conexión con {modelo} (Intento {intento}/{retries}): {e}")
 
+            # BACKOFF EXPONENCIAL CON JITTER (Aleatoriedad controlada)
             if intento < retries:
-                time.sleep(2)
+                tiempo_base = 2 ** intento  # 2s, 4s, 8s...
+                jitter = random.uniform(0, 1.5)  # Añade un retraso extra aleatorio entre 0 y 1.5 segundos
+                espera = tiempo_base + jitter
+                
+                print(f"   ⏳ Esperando {espera:.2f} segundos antes del próximo reintento (con jitter)...")
+                time.sleep(espera)
 
-        print(
-            f"❌ El modelo '{modelo}' agotó sus reintentos. Pasando al siguiente"
-            " respaldo...\n"
-        )
+        print(f"❌ El modelo '{modelo}' agotó sus reintentos. Pasando al siguiente respaldo...\n")
 
-    raise RuntimeError(
-        "⚠️ Todos los modelos fallaron o no están disponibles en este momento."
-        " Intenta más tarde."
-    )
+    raise RuntimeError("⚠️ Se agotaron todos los reintentos en todos los modelos disponibles sin obtener respuesta.")
 
 # --- Responsabilidad 3: Extraer el texto ---
 def extraer_texto(datos_json):
