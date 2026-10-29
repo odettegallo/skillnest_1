@@ -58,8 +58,19 @@ def enviar_peticion(pregunta, modelo):
     return respuesta.json()
 
 # --- Responsabilidad 2: Enviar la petición con resiliencia y Fallback ---
+# Variable global para recordar el índice del último modelo que tuvo éxito
+_indice_modelo_exitoso = 0
+
 def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_schema=None, modelos=MODELOS_DISPONIBLES, retries=3):
-    for modelo in modelos:
+    global _indice_modelo_exitoso
+    
+    # Reordenamos la lista de modelos para poner al principio el que funcionó la última vez
+    modelos_ordenados = list(modelos)
+    if _indice_modelo_exitoso > 0 and _indice_modelo_exitoso < len(modelos_ordenados):
+        modelo_favorito = modelos_ordenados.pop(_indice_modelo_exitoso)
+        modelos_ordenados.insert(0, modelo_favorito)
+        
+    for modelo in modelos_ordenados:
         print(f"🔄 Intentando conectar con el modelo: {modelo}...")
         
         try:
@@ -71,7 +82,6 @@ def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_sch
             try:
                 respuesta = requests.post(url, json=body, timeout=30)
 
-                # Si es un error de cliente insalvable (API Key inválida, etc.)
                 if 400 <= respuesta.status_code <= 403:
                     try:
                         error_json = respuesta.json()
@@ -93,7 +103,12 @@ def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_sch
                         datos = respuesta.json()
                         print(f"   ✅ ¡Conexión exitosa con {modelo}!")
                         
-                        # Registramos el costo de inmediato de forma segura
+                        # MEMORIA INTELIGENTE: Guardamos la posición real de este modelo exitoso 
+                        # para que sea el primero en ser consultado en la próxima solicitud.
+                        if modelo in MODELOS_DISPONIBLES:
+                            _indice_modelo_exitoso = MODELOS_DISPONIBLES.index(modelo)
+                        
+                        # Registramos el costo de inmediato
                         registrar_costo(datos, modelo)
                         
                         return datos
@@ -103,19 +118,17 @@ def enviar_peticion_con_fallback(pregunta, system_instruction=None, response_sch
             except requests.exceptions.RequestException as e:
                 print(f"   ⚠️ Error de red/conexión con {modelo} (Intento {intento}/{retries}): {e}")
 
-            # BACKOFF EXPONENCIAL CON JITTER (Aleatoriedad controlada)
             if intento < retries:
-                tiempo_base = 2 ** intento  # 2s, 4s, 8s...
-                jitter = random.uniform(0, 1.5)  # Añade un retraso extra aleatorio entre 0 y 1.5 segundos
+                tiempo_base = 2 ** intento
+                jitter = random.uniform(0, 1.5)
                 espera = tiempo_base + jitter
-                
                 print(f"   ⏳ Esperando {espera:.2f} segundos antes del próximo reintento (con jitter)...")
                 time.sleep(espera)
 
         print(f"❌ El modelo '{modelo}' agotó sus reintentos. Pasando al siguiente respaldo...\n")
 
     raise RuntimeError("⚠️ Se agotaron todos los reintentos en todos los modelos disponibles sin obtener respuesta.")
-
+    
 # --- Responsabilidad 3: Extraer el texto ---
 def extraer_texto(datos_json):
     try:

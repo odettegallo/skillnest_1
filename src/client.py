@@ -2,15 +2,13 @@ import json
 import os
 import time
 import requests
+import try_api
 
-# Importamos las funciones base desde try_api.py
+# Importamos las funciones base desde try_api.py y la configuración
 from try_api import (
     enviar_peticion_con_fallback,
     extraer_texto,
     parsear_respuesta_json,
-    calcular_costo,
-    registrar_costo,
-    costo_total_sesion
 )
 from config import BANCO_DE_PROMPTS
 
@@ -25,7 +23,7 @@ def consultar_modelo(
     extrae el texto y maneja los errores limpiamente para quien consume el cliente.
     """
     try:
-        # 1 y 2. Envío con reintentos, manejo de límites de uso (429/503) y fallback
+        # 1 y 2. Envío con reintentos, manejo de límites de uso (429/503) y fallback con jitter
         datos_respuesta = enviar_peticion_con_fallback(
             pregunta=pregunta,
             system_instruction=system_instruction,
@@ -50,10 +48,6 @@ def ejecutar_banco_de_prompts():
     # Aseguramos que exista la carpeta 'prompts'
     os.makedirs("prompts", exist_ok=True)
     registro = {}
-    
-    # Reiniciamos o tomamos el costo de sesión actual si deseas acumularlo
-    global costo_total_sesion
-    costo_sesion_inicial = costo_total_sesion
 
     for prompt in BANCO_DE_PROMPTS:
         nombre = prompt["nombre"]
@@ -64,7 +58,7 @@ def ejecutar_banco_de_prompts():
         
         for intento in range(intentos_totales):
             try:
-                # Enviamos con tu lógica de fallback y parámetros estandarizados
+                # Enviamos con la lógica de fallback y parámetros estandarizados
                 datos_respuesta = enviar_peticion_con_fallback(
                     pregunta=prompt["ejemplo_usuario"],
                     system_instruction=prompt["system_instruction"],
@@ -92,10 +86,9 @@ def ejecutar_banco_de_prompts():
             "intentos": intentos_totales
         }
 
-    # Estructura final del JSON que incluirá el resumen de costos de la sesión
+    # Estructura final del JSON que incluirá el resumen
     resultado_final = {
-        "resumen_prompts": registro,
-        "costo_total_sesion_usd": round(costo_total_sesion - costo_sesion_inicial, 6)
+        "resumen_prompts": registro
     }
 
     # Guardar registro global en un archivo JSON
@@ -103,15 +96,30 @@ def ejecutar_banco_de_prompts():
     with open(ruta_registro, "w", encoding="utf-8") as archivo:
         json.dump(resultado_final, archivo, indent=2, ensure_ascii=False)
     
-    print(f"\n📁 Registro y costos guardados exitosamente en '{ruta_registro}'.")
-
-# --- Función de prueba simple con cálculo de costos ---
-def test_api_connection(pregunta):
-    return consultar_modelo(pregunta)
+    print(f"\n📁 Registro de resultados guardado exitosamente en '{ruta_registro}'.")
 
 
 # --- Bloque de Ejecución Principal ---
 if __name__ == "__main__":
+    print("🚀 Iniciando prueba de estrés controlada para observar resiliencia, jitter y costos...\n")
+    
+    total_intentos = 5
+    for i in range(1, total_intentos + 1):
+        try:
+            print(f"--- Solicitud #{i} ---")
+            resultado = consultar_modelo(f"Dame un dato curioso sobre tecnología número {i}")
+            # Muestra la respuesta COMPLETA en lugar de cortarla con [:60]
+            print(f"✨ Respuesta completa:\n{resultado}\n")
+        except RuntimeError as error:
+            print(f"❌ La solicitud #{i} falló definitivamente: {error}\n")
+        
+        time.sleep(0.5)
+
+    # Impresión del costo total acumulado leyendo directamente la variable global de try_api
+    print(f"==================================================")
+    print(f"💰 Costo total acumulado del ensayo: ${try_api.costo_total_sesion:.5f} USD")
+    print(f"==================================================")
+    
     try:
         pregunta_prueba = "¿Cuál es la capital de Chile?"
         print(f"Enviando consulta: '{pregunta_prueba}'\n")
@@ -126,5 +134,8 @@ if __name__ == "__main__":
 
     try:
         ejecutar_banco_de_prompts()
+        print(f"\n==================================================")
+        print(f"💰 Costo total FINAL acumulado (incluyendo banco): ${try_api.costo_total_sesion:.5f} USD")
+        print(f"==================================================")
     except Exception as error:
         print(f"\n❌ Error crítico en el banco de prompts: {error}")
