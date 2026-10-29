@@ -58,7 +58,7 @@ def ejecutar_banco_de_prompts():
         
         for intento in range(intentos_totales):
             try:
-                # Enviamos con la lógica de fallback y parámetros estandarizados
+                # Enviamos con la lógica de fallback, jitter y memoria inteligente
                 datos_respuesta = enviar_peticion_con_fallback(
                     pregunta=prompt["ejemplo_usuario"],
                     system_instruction=prompt["system_instruction"],
@@ -86,9 +86,10 @@ def ejecutar_banco_de_prompts():
             "intentos": intentos_totales
         }
 
-    # Estructura final del JSON que incluirá el resumen
+    # Estructura final del JSON que incluye tanto el resumen como el costo total acumulado
     resultado_final = {
-        "resumen_prompts": registro
+        "resumen_prompts": registro,
+        "costo_total_sesion_usd": round(try_api.costo_total_sesion, 6)
     }
 
     # Guardar registro global en un archivo JSON
@@ -96,7 +97,7 @@ def ejecutar_banco_de_prompts():
     with open(ruta_registro, "w", encoding="utf-8") as archivo:
         json.dump(resultado_final, archivo, indent=2, ensure_ascii=False)
     
-    print(f"\n📁 Registro de resultados guardado exitosamente en '{ruta_registro}'.")
+    print(f"\n📁 Registro y costos guardados exitosamente en '{ruta_registro}'.")
 
 
 # --- Bloque de Ejecución Principal ---
@@ -107,7 +108,7 @@ if __name__ == "__main__":
     for i in range(1, total_intentos + 1):
         try:
             print(f"--- Solicitud #{i} ---")
-            resultado = consultar_modelo(f"Dame un dato curioso sobre tecnología número {i}")
+            resultado = consultar_modelo(f"Dame un dato curioso sobre mujeres en tecnología número {i}")
             # Muestra la respuesta COMPLETA en lugar de cortarla con [:60]
             print(f"✨ Respuesta completa:\n{resultado}\n")
         except RuntimeError as error:
