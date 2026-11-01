@@ -89,9 +89,9 @@ def obtener_estado_f1(f1: float) -> str:
 # 2. FUNCIÓN ORQUESTADORA (EJECUCIÓN)
 # ==========================================
 def ejecutar_pruebas():
-    print("🚀 Iniciando evaluación de métricas con el modelo...\n")
+    print("🚀 Iniciando evaluación masiva de métricas con el modelo (12 casos)...\n")
 
-    # Referencias más detalladas para reducir el sesgo de longitud por cantidad de tokens
+    # Banco ampliado de 12 casos de prueba sobre Python y tecnología
     casos = [
         (
             "¿Qué es Python?",
@@ -106,9 +106,53 @@ def ejecutar_pruebas():
         ),
         (
             "¿Qué es una lista en Python?",
-            "En Python, una lista es una estructura de datos ejecutable integrada que permite almacenar "
-            "una colección ordenada y mutable de elementos. Se define utilizando corchetes y sus elementos "
-            "pueden ser de diferentes tipos de datos."
+            "En Python, una lista es una estructura de datos integrada que permite almacenar "
+            "una colección ordenada y mutable de elementos entre corchetes."
+        ),
+        (
+            "¿Qué es un diccionario en Python?",
+            "Un diccionario es una estructura de datos mutable que almacena pares de clave y valor, "
+            "permitiendo búsquedas rápidas mediante claves únicas."
+        ),
+        (
+            "¿Qué es una tupla en Python?",
+            "Una tupla es una estructura de datos similar a una lista pero inmutable, es decir, "
+            "sus elementos no pueden ser modificados una vez creada la tupla."
+        ),
+        (
+            "¿Para qué sirve la función print en Python?",
+            "La función print se utiliza para mostrar mensajes o valores de variables en la consola "
+            "o salida estándar."
+        ),
+        (
+            "¿Qué es pip en Python?",
+            "Pip es el sistema de gestión de paquetes estándar para Python, utilizado para instalar "
+            "y administrar bibliotecas de terceros que no vienen en la biblioteca estándar."
+        ),
+        (
+            "¿Qué es un entorno virtual en Python?",
+            "Un entorno virtual es un directorio aislado que contiene una instalación de Python "
+            "y las dependencias específicas de un proyecto, evitando conflictos entre versiones."
+        ),
+        (
+            "¿Qué es el tipado dinámico en Python?",
+            "El tipado dinámico significa que el tipo de una variable se determina en tiempo de ejecución "
+            "y no es necesario declararlo explícitamente al escribir el código."
+        ),
+        (
+            "¿Qué es la programación orientada a objetos?",
+        "Es un paradigma de programación basado en el concepto de clases y objetos, que agrupan "
+            "datos y comportamientos relacionados."
+        ),
+        (
+            "¿Qué es Git?",
+            "Git es un sistema de control de versiones distribuido diseñado para rastrear cambios "
+            "en el código fuente durante el desarrollo de software."
+        ),
+        (
+            "¿Qué es Docker?",
+            "Docker es una plataforma de código abierto que permite empaquetar aplicaciones y sus dependencias "
+            "en contenedores ligeros y portables."
         ),
     ]
 
@@ -119,7 +163,6 @@ def ejecutar_pruebas():
         respuesta = consultar_modelo(consulta)
         
         metricas = calcular_metricas(referencia, respuesta)
-        estado = obtener_estado_f1(metricas["f1"])
         
         resultados.append({
             "consulta": consulta,
@@ -127,20 +170,23 @@ def ejecutar_pruebas():
             "referencia": referencia,
             **metricas
         })
-        print(f"   ✨ F1 obtenido: {metricas['f1']:.2f} -> {estado}\n")
+        print(f"   ✨ F1 obtenido: {metricas['f1']:.2f}\n")
 
-    # Guardamos los resultados en el archivo JSON
+    # Guardamos los resultados completos en el archivo JSON
     ruta_salida = "prompts/resultados_metricas.json"
     with open(ruta_salida, "w", encoding="utf-8") as archivo:
         json.dump(resultados, archivo, indent=2, ensure_ascii=False)
 
     print(f"📁 Resultados y métricas guardados exitosamente en '{ruta_salida}'.\n")
 
-    # --- Resumen clasificado por desempeño de F1 ---
-    print("📊 Resultados ordenados por desempeño de F1 (de menor a mayor):")
-    casos_ordenados = sorted(resultados, key=lambda r: r["f1"])
+    # --- Análisis de la muestra solicitada por el curso (5 peores y 5 mejores) ---
+    print("📊 Muestra para revisión a mano (5 peores y 5 mejores F1):")
+    peores_casos = sorted(resultados, key=lambda r: r["f1"])
+    
+    # Combinamos los 5 peores con los 5 mejores (tal como indica la lección)
+    muestra_para_revisar = peores_casos[:5] + peores_casos[-5:]
 
-    for caso in casos_ordenados:
+    for caso in muestra_para_revisar:
         estado = obtener_estado_f1(caso["f1"])
         print(f"   {estado} F1: {caso['f1']:.2f} | Consulta: '{caso['consulta']}'")
 
