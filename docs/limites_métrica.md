@@ -4,7 +4,7 @@ Este documento registra los resultados obtenidos tras ejecutar el pipeline de ev
 
 ---
 
-## 📋 Resumen de la Muestra Analizada (Extremos)
+## 📋 Resumen de la Muestra Analizada (Extremos) 01/11/2026
 
 A continuación se muestra la muestra combinada obtenida tras ordenar los casos evaluados por su puntaje F1 (enfocándose en los casos con menor rendimiento y los mejores desempeños):
 

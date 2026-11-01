@@ -1,8 +1,10 @@
 import re
 import json
+import config
 import client
 from collections import Counter
 from client import consultar_modelo 
+from config import CASOS_EVALUACION
 
 # ==========================================
 # 1. FUNCIONES DEL PIPELINE DE TEXTO
@@ -91,77 +93,19 @@ def obtener_estado_f1(f1: float) -> str:
 def ejecutar_pruebas():
     print("🚀 Iniciando evaluación masiva de métricas con el modelo (12 casos)...\n")
 
-    # Banco ampliado de 12 casos de prueba sobre Python y tecnología
-    casos = [
-        (
-            "¿Qué es Python?",
-            "Python es un lenguaje de programación de alto nivel, interpretado, de código abierto y multiparadigma. "
-            "Es reconocido por su sintaxis clara y legible, ideal para desarrollo web, análisis de datos, "
-            "inteligencia artificial y automatización de procesos."
-        ),
-        (
-            "¿Cuándo se creó Python?",
-            "Python fue creado a finales de los años 80 por Guido van Rossum en los Países Bajos, "
-            "y su primera versión oficial (0.9.0) fue publicada en febrero de 1991."
-        ),
-        (
-            "¿Qué es una lista en Python?",
-            "En Python, una lista es una estructura de datos integrada que permite almacenar "
-            "una colección ordenada y mutable de elementos entre corchetes."
-        ),
-        (
-            "¿Qué es un diccionario en Python?",
-            "Un diccionario es una estructura de datos mutable que almacena pares de clave y valor, "
-            "permitiendo búsquedas rápidas mediante claves únicas."
-        ),
-        (
-            "¿Qué es una tupla en Python?",
-            "Una tupla es una estructura de datos similar a una lista pero inmutable, es decir, "
-            "sus elementos no pueden ser modificados una vez creada la tupla."
-        ),
-        (
-            "¿Para qué sirve la función print en Python?",
-            "La función print se utiliza para mostrar mensajes o valores de variables en la consola "
-            "o salida estándar."
-        ),
-        (
-            "¿Qué es pip en Python?",
-            "Pip es el sistema de gestión de paquetes estándar para Python, utilizado para instalar "
-            "y administrar bibliotecas de terceros que no vienen en la biblioteca estándar."
-        ),
-        (
-            "¿Qué es un entorno virtual en Python?",
-            "Un entorno virtual es un directorio aislado que contiene una instalación de Python "
-            "y las dependencias específicas de un proyecto, evitando conflictos entre versiones."
-        ),
-        (
-            "¿Qué es el tipado dinámico en Python?",
-            "El tipado dinámico significa que el tipo de una variable se determina en tiempo de ejecución "
-            "y no es necesario declararlo explícitamente al escribir el código."
-        ),
-        (
-            "¿Qué es la programación orientada a objetos?",
-        "Es un paradigma de programación basado en el concepto de clases y objetos, que agrupan "
-            "datos y comportamientos relacionados."
-        ),
-        (
-            "¿Qué es Git?",
-            "Git es un sistema de control de versiones distribuido diseñado para rastrear cambios "
-            "en el código fuente durante el desarrollo de software."
-        ),
-        (
-            "¿Qué es Docker?",
-            "Docker es una plataforma de código abierto que permite empaquetar aplicaciones y sus dependencias "
-            "en contenedores ligeros y portables."
-        ),
-    ]
+    casos = CASOS_EVALUACION
 
     resultados = []
+    instruccion_concisa = (
+        "Responde de forma directa, breve y concisa, en un máximo de una o dos oraciones, "
+        "sin incluir introducciones largas ni explicaciones innecesarias."
+    )
 
     for consulta, referencia in casos:
         print(f"🔍 Consultando: '{consulta}'")
         respuesta = consultar_modelo(consulta)
-        
+        system_instruction=instruccion_concisa
+
         metricas = calcular_metricas(referencia, respuesta)
         
         resultados.append({
@@ -179,16 +123,24 @@ def ejecutar_pruebas():
 
     print(f"📁 Resultados y métricas guardados exitosamente en '{ruta_salida}'.\n")
 
-    # --- Análisis de la muestra solicitada por el curso (5 peores y 5 mejores) ---
+ # --- Análisis de la muestra solicitada por el curso (5 peores y 5 mejores) ---
     print("📊 Muestra para revisión a mano (5 peores y 5 mejores F1):")
     peores_casos = sorted(resultados, key=lambda r: r["f1"])
     
-    # Combinamos los 5 peores con los 5 mejores (tal como indica la lección)
-    muestra_para_revisar = peores_casos[:5] + peores_casos[-5:]
-
-    for caso in muestra_para_revisar:
+    # 1. Sección de los 5 peores
+    print("\n   📉 --- Los 5 peores casos ---")
+    for caso in peores_casos[:5]:
         estado = obtener_estado_f1(caso["f1"])
-        print(f"   {estado} F1: {caso['f1']:.2f} | Consulta: '{caso['consulta']}'")
+        print(f"      {estado} F1: {caso['f1']:.2f} | Consulta: '{caso['consulta']}'")
+
+    # Corte de texto / separador visual
+    print("\n   --------------------------------------------------")
+    
+    # 2. Sección de los 5 mejores
+    print("   📈 --- Los 5 mejores casos ---")
+    for caso in peores_casos[-5:]:
+        estado = obtener_estado_f1(caso["f1"])
+        print(f"      {estado} F1: {caso['f1']:.2f} | Consulta: '{caso['consulta']}'")
 
 
 # ==========================================
