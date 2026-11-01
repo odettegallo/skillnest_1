@@ -1,3 +1,4 @@
+
 # Proyecto Gate 1 — Especialización en Desarrollo con IA Generativa (Accenture)
 
 Aplicación en Python que se conecta a la API de Google Gemini utilizando una arquitectura resiliente con múltiples modelos (Fallback), manejo estricto de errores y un banco de prompts validados mediante esquemas JSON estructurados.
@@ -10,23 +11,34 @@ Aplicación en Python que se conecta a la API de Google Gemini utilizando una ar
 plantilla-repositorio-base/
 │
 ├── docs/                      # Documentación técnica y diagramas de arquitectura
+│   ├── .gitkeep
 │   ├── diagrama_arquitectura_API.png
 │   ├── eleccion_arquitectura.md
 │   └── evidencia_peticion.png
 │
-├── prompts/                   # Banco de prompts estructurados y registros de pruebas
+├── prompts/                   # Banco de prompts estructurados y registros de resultados
+│   ├── registro_resultados.json
+│   └── resultados_metricas.json
 │
 ├── src/                       # Código fuente principal de la aplicación
+│   ├── client.py              # Cliente modular y orquestador del modelo
 │   ├── config.py              # Configuración global, modelos y constantes
-│   ├── try_api.py             # Script orquestador principal y lógica de la API
-│   └── latencias.py           # Mediciones y pruebas de rendimiento/latencia
+│   ├── latency.py             # Mediciones y pruebas de rendimiento/latencia
+│   ├── pipeline_clean_text.py # Limpieza de texto, tokenización y cálculo de métricas F1
+│   └── try_api.py             # Script base de conexión a la API
 │
-├── tests/                     # Pruebas unitarias del código
+├── tests/                     # Pruebas unitarias del código con pytest
+│   ├── test_client.py         # Pruebas para el cliente modular y resiliencia
+│   └── test_pipeline_clean.py # Pruebas para el pipeline de texto y métricas
+│
 ├── .env.example               # Plantilla de variables de entorno (requiere API Key)
 ├── .env                       # Variables de entorno reales (excluido en .gitignore)
 ├── .gitignore                 # Archivos y carpetas ignorados por Git
+├── pyproject.toml             # Configuración del paquete y dependencias de desarrollo
+├── pytest.ini                 # Configuración general para la ejecución de pruebas
 ├── requirements.txt           # Dependencias del proyecto
 └── README.md                  # Instrucciones de instalación y ejecución
+
 ```
 
 ---
@@ -66,6 +78,7 @@ Instala los paquetes definidos en `requirements.txt`:
 
 ```bash
 pip install -r requirements.txt
+pip install -e .
 ```
 
 ### 4. Configurar las credenciales (.env)
@@ -95,7 +108,7 @@ GEMINI_API_KEY=tu_clave_de_api_aqui
 Una vez configurado el entorno y las credenciales, ejecuta:
 
 ```bash
-python src/try_api.py
+python src/client.py
 ```
 
 También puedes ejecutar otros scripts ubicados dentro de la carpeta `src/` según la funcionalidad que quieras probar.
@@ -115,6 +128,11 @@ Implementación de validaciones y excepciones controladas (`ValueError`, `Runtim
 ### ✅ Banco de Prompts y Schemas
 
 Validación estricta de respuestas JSON mediante esquemas predefinidos que garantizan consistencia estructural y facilidad de procesamiento.
+
+### ✅ Pipeline de Texto y Métricas (F1)
+
+Limpieza de texto, tokenización y cálculo automatizado de métricas de Precisión, Cobertura y F1 comparando respuestas generadas por la IA frente a textos de referencia, clasificando el desempeño e identificando los peores casos para su revisión.
+
 
 ---
 
@@ -221,12 +239,12 @@ La prueba confirmó que la arquitectura implementada es capaz de mantener la con
 - Revisión de rúbrica Gate 1
 
 
-## 🧪 Pruebas (en desarrollo)
+## 🧪 Ejecución de Pruebas Unitarias
 
-Si el proyecto incluye pruebas automatizadas dentro de la carpeta `tests/`, pueden ejecutarse con:
+El proyecto incluye una suite de pruebas automatizadas con pytest ubicada en la carpeta tests/. Para ejecutarlas, asegúrate de tener tu entorno virtual activo y corre:
 
 ```bash
-pytest
+pytest tests/ -v
 ```
 
 ---
