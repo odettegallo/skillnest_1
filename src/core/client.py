@@ -2,15 +2,14 @@ import json
 import os
 import time
 import requests
-import try_api
 
 # Importamos las funciones base desde try_api.py y la configuración
-from try_api import (
+from core.try_api import (
     enviar_peticion_con_fallback,
     extraer_texto,
     parsear_respuesta_json,
 )
-from config import BANCO_DE_PROMPTS
+from core.config import BANCO_DE_PROMPTS
 
 
 # =====================================================================

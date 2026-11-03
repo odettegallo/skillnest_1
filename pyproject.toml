@@ -5,10 +5,15 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "plantilla-repositorio-base"
 version = "0.1.0"
-dependencies = []
+dependencies = [
+    "langchain",
+    "langchain-google-genai",
+    "python-dotenv",
+]
 
 [tool.setuptools.package-dir]
 "" = "src"
 
-[tool.setuptools]
-py-modules = ["client", "config", "latency", "pipeline_clean_text", "try_api"]
+# En lugar de py-modules, le indicamos que busque los paquetes dentro de "src"
+[tool.setuptools.packages.find]
+where = ["src"]

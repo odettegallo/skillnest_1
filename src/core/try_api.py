@@ -5,7 +5,7 @@ import time
 import random
 import requests
 from dotenv import load_dotenv
-from config import MODELOS_DISPONIBLES, BANCO_DE_PROMPTS, TARIFAS_MODELOS
+from core.config import MODELOS_DISPONIBLES, BANCO_DE_PROMPTS, TARIFAS_MODELOS
 
 # Carga las variables del archivo .env
 load_dotenv()

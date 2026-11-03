@@ -1,10 +1,9 @@
 import re
 import json
-import config
-import client
 from collections import Counter
-from client import consultar_modelo 
-from config import CASOS_EVALUACION
+from core import try_api
+from core.client import consultar_modelo 
+from core.config import CASOS_EVALUACION
 
 # ==========================================
 # 1. FUNCIONES DEL PIPELINE DE TEXTO

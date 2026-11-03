@@ -1,5 +1,5 @@
 import time
-from try_api import enviar_peticion, MODELOS_DISPONIBLES
+from core.try_api import enviar_peticion, MODELOS_DISPONIBLES
 
 def medir_latencia_modelo(pregunta, modelo, iteraciones=3):
     """Mide la latencia de un modelo específico de forma aislada."""
