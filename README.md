@@ -108,7 +108,7 @@ GEMINI_API_KEY=tu_clave_de_api_aqui
 Una vez configurado el entorno y las credenciales, ejecuta:
 
 ```bash
-python src/client.py
+python src/main.py
 ```
 
 También puedes ejecutar otros scripts ubicados dentro de la carpeta `src/` según la funcionalidad que quieras probar.
