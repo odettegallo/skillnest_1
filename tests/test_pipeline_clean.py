@@ -1,4 +1,4 @@
-from pipeline_clean_text import procesar_texto  
+from pipelines.pipeline_clean_text import procesar_texto  
 
 def test_procesar_texto_normaliza_mayusculas_y_puntuacion():
     """Verifica que el pipeline convierta a minúsculas, limpie puntuación y tokenice correctamente."""

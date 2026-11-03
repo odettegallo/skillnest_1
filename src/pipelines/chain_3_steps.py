@@ -6,20 +6,23 @@ from langchain_core.output_parsers import StrOutputParser
 # Importamos tu lista de modelos configurada previamente
 from core.config import MODELOS_DISPONIBLES
 
-def construir_cadena():
+def construir_cadena(modelo_personalizado=None):
     """
-    Construye una cadena de 3 pasos con resiliencia y fallback automático 
-    entre los modelos definidos en config.py.
+    Construye una cadena de 3 pasos con resiliencia y fallback automático.
+    Permite inyectar un modelo personalizado (útil para mocks en pruebas unitarias).
     """
-    # 1. Configuramos el modelo principal y los respaldos usando LangChain
-    modelo_principal_str = MODELOS_DISPONIBLES[0] # Ej: "gemini-3.5-flash"
-    modelos_respaldo_strs = MODELOS_DISPONIBLES[1:] # El resto de modelos
-    
-    modelo_principal = ChatGoogleGenerativeAI(model=modelo_principal_str)
-    modelos_respaldo = [ChatGoogleGenerativeAI(model=m) for m in modelos_respaldo_strs]
-    
-    # 🛡️ Aplicamos el fallback nativo de LangChain
-    modelo_seguro = modelo_principal.with_fallbacks(modelos_respaldo)
+    if modelo_personalizado is not None:
+        modelo_seguro = modelo_personalizado
+    else:
+        # 1. Configuramos el modelo principal y los respaldos usando LangChain
+        modelo_principal_str = MODELOS_DISPONIBLES[0] # Ej: "gemini-3.5-flash"
+        modelos_respaldo_strs = MODELOS_DISPONIBLES[1:] # El resto de modelos
+        
+        modelo_principal = ChatGoogleGenerativeAI(model=modelo_principal_str)
+        modelos_respaldo = [ChatGoogleGenerativeAI(model=m) for m in modelos_respaldo_strs]
+        
+        # 🛡️ Aplicamos el fallback nativo de LangChain
+        modelo_seguro = modelo_principal.with_fallbacks(modelos_respaldo)
 
     # 2. Definimos las tres plantillas (PromptTemplate)
     plantilla_traducir = PromptTemplate.from_template(
@@ -50,13 +53,8 @@ def construir_cadena():
 
 
 if __name__ == "__main__":
-    # Carga las credenciales del archivo .env
     load_dotenv()
-    
-    # Construimos la cadena resiliente
     cadena = construir_cadena()
-
-    # Caso de entrada real
     texto_entrada = (
         "Asynchronous programming allows the execution of tasks "
         "concurrently without blocking the main execution thread, "

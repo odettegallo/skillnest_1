@@ -1,12 +1,12 @@
 from unittest.mock import patch, Mock
 import pytest
 import requests
-import try_api
-from try_api import (
+from core import try_api
+from core.try_api import (
     enviar_peticion_con_fallback,
     registrar_costo,
 )
-from client import consultar_modelo
+from core.client import consultar_modelo
 
 
 def test_enviar_peticion_credencial_invalida():
@@ -55,7 +55,7 @@ def test_enviar_peticion_exito():
 
 def test_con_reintento_agota_intentos():
     """Verifica que si todos los reintentos y modelos fallan, se lance un RuntimeError global."""
-    respuesta_falsa = Mock(status_code=503) # Servicio no disponible
+    respuesta_falsa = Mock(status_code=503)
 
     with patch("requests.post", return_value=respuesta_falsa):
         with pytest.raises(RuntimeError) as excinfo:
@@ -64,23 +64,20 @@ def test_con_reintento_agota_intentos():
 
 
 def test_con_reintento_no_reintenta_value_error():
-    """Verifica que los errores de tipo ValueError (como credenciales) interrumpan el bucle de reintentos al instante."""
+    """Verifica que los errores de tipo ValueError interrumpan el bucle de reintentos al instante."""
     respuesta_falsa = Mock(status_code=403)
     respuesta_falsa.json.return_value = {
         "error": {"message": "Key not valid"}
     }
 
-    # Contamos cuántas veces se llama a requests.post para asegurar que no reintenta
     with patch("requests.post", return_value=respuesta_falsa) as mock_post:
         with pytest.raises(ValueError):
             enviar_peticion_con_fallback("Prueba", retries=3)
-        # Debería llamarse solo 1 vez para el primer modelo y fallar rápido
         assert mock_post.call_count == 1
 
 
 def test_registrar_costo_acumula():
     """Verifica que el registro de costos sume correctamente en la variable global de sesión."""
-    # Reseteamos el estado global al inicio para evitar contaminación entre pruebas
     try_api.costo_total_sesion = 0.0
     datos_simulados = {
         "usageMetadata": {
@@ -99,10 +96,9 @@ def test_registrar_costo_acumula():
 def test_consultar_modelo_convierte_error():
     """Verifica que el cliente modular (consultar_modelo) capture las excepciones técnicas y las convierta en un RuntimeError amigable."""
     
-    # Parcheamos la función en el módulo 'client' que es quien llama y envuelve el error en try...except
-    with patch("client.enviar_peticion_con_fallback", side_effect=Exception("Fallo crítico de red")):
+    # Actualizamos la ruta del patch con la nueva ubicación en 'core.client'
+    with patch("core.client.enviar_peticion_con_fallback", side_effect=Exception("Fallo crítico de red")):
         with pytest.raises(RuntimeError) as excinfo:
             consultar_modelo("Pregunta de prueba")
         
-        # Validamos que contenga el mensaje amigable configurado en client.py
         assert "Error inesperado en el cliente modular" in str(excinfo.value)
