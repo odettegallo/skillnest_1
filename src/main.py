@@ -4,7 +4,7 @@ import os
 # Aseguramos que la carpeta 'src' esté en el path de Python para importar sin problemas
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
 
-from pipeline_clean_text import ejecutar_pruebas
+from pipelines.pipeline_clean_text import ejecutar_pruebas
 
 if __name__ == "__main__":
     print("==================================================")
