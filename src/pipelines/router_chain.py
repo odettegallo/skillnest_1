@@ -1,11 +1,16 @@
+import logging
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableBranch, RunnablePassthrough
+from langchain_core.runnables import RunnableBranch, RunnablePassthrough, RunnableLambda
 
 # Importamos tu lista de modelos configurada previamente
 from core.config import MODELOS_DISPONIBLES
+
+# Silenciamos los logs informativos ruidosos de la API de Google (dejamos solo WARNING o ERROR)
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 # 1. Plantilla global de clasificación
 plantilla_clasificacion = PromptTemplate.from_template(
@@ -48,6 +53,11 @@ def construir_cadena_con_enrutamiento(
         | bifurcacion
     )
 
+# A nivel global
+respuesta_generica = RunnableLambda(
+    lambda x: "Gracias por tu mensaje. Un miembro de nuestro equipo te va a responder pronto."
+)
+
 def construir_router(modelo_personalizado=None):
     """Función contenedora principal para inicializar el router completo."""
     if modelo_personalizado is not None:
@@ -62,28 +72,28 @@ def construir_router(modelo_personalizado=None):
 
     # Definimos las cadenas de respuesta especializadas
     cadena_pregunta = (
-        PromptTemplate.from_template("Responde esta pregunta técnica con precisión:\n\n{mensaje}")
+        PromptTemplate.from_template("Responde esta pregunta técnica de forma muy breve y directa (máximo 2 oraciones):\n\n{mensaje}")
         | modelo
         | StrOutputParser()
-    )
+    ).with_fallbacks([respuesta_generica])
 
     cadena_queja = (
-        PromptTemplate.from_template("Responde a esta queja con empatía, reconociendo el problema antes de ofrecer una solución:\n\n{mensaje}")
+        PromptTemplate.from_template("Responde a esta queja con empatía y brevedad (máximo 2 oraciones):\n\n{mensaje}")
         | modelo
         | StrOutputParser()
-    )
+    ).with_fallbacks([respuesta_generica])
 
     cadena_sugerencia = (
-        PromptTemplate.from_template("Agradece esta sugerencia y explica cómo se evaluará dentro del producto:\n\n{mensaje}")
+        PromptTemplate.from_template("Agradece esta sugerencia brevemente en una sola oración:\n\n{mensaje}")
         | modelo
         | StrOutputParser()
-    )
+    ).with_fallbacks([respuesta_generica])
 
     cadena_elogio = (
-        PromptTemplate.from_template("Agradece este elogio de manera cordial y profesional:\n\n{mensaje}")
+        PromptTemplate.from_template("Agradece este elogio de manera cordial en una sola oración:\n\n{mensaje}")
         | modelo
         | StrOutputParser()
-    )
+    ).with_fallbacks([respuesta_generica])
 
     paso_clasificacion = construir_paso_clasificacion(modelo)
     
@@ -95,26 +105,43 @@ def construir_router(modelo_personalizado=None):
         cadena_pregunta=cadena_pregunta,
     )
 
+# Función segura que utiliza la instancia correcta del router
+def procesar_mensaje_seguro(mensaje, router_chain):
+    try:
+        return router_chain.invoke({"mensaje": mensaje})
+    except Exception as error:
+        logger.error(f"Error procesando mensaje: {error}")
+        return (
+            "No pudimos procesar tu mensaje en este momento. "
+            "Intenta de nuevo más tarde."
+        )
 
 if __name__ == "__main__":
     load_dotenv()
     router_chain = construir_router()
 
     print("🚀 Ejecutando router de mensajes con RunnableBranch...\n")
+
+    # Prueba del fallback forzado
+    def fallar_a_proposito(x):
+        raise Exception("Error de red simulado")
+
+    cadena_rota = RunnableLambda(fallar_a_proposito)
+    cadena_rota_segura = cadena_rota.with_fallbacks([respuesta_generica])
     
-    # Lista con diferentes escenarios (pregunta, queja y sugerencia)
+    resultado_fallback = cadena_rota_segura.invoke({"mensaje": "prueba"})
+    print(f"🛡️ Prueba de fallback forzado:\n{resultado_fallback}\n" + "-" * 50)
+
+    # Lista con diferentes escenarios de prueba
     casos_prueba = [
         "¿Cómo cambio mi contraseña?",
         "La app se cierra cada vez que subo una foto.",
         "Estaría bueno que la app tuviera modo oscuro.",
         "¡Me encanta la nueva interfaz, está muy intuitiva!",
+        "",
     ]
 
-    try:
-        for mensaje in casos_prueba:
-            print(f"📥 Mensaje de entrada: \"{mensaje}\"")
-            resultado = router_chain.invoke({"mensaje": mensaje})
-            print(f"📤 Respuesta obtenida:\n{resultado}\n" + "-" * 50)
-            
-    except Exception as error:
-        print(f"❌ Ocurrió un error en la ejecución: {error}")
+    for mensaje in casos_prueba:
+        print(f"📥 Mensaje de entrada: \"{mensaje}\"")
+        resultado = procesar_mensaje_seguro(mensaje, router_chain)
+        print(f"📤 Respuesta obtenida:\n{resultado}\n" + "-" * 50)
