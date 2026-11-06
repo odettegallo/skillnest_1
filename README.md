@@ -1,7 +1,7 @@
 
 # Proyecto Gate 1 — Especialización en Desarrollo con IA Generativa (Accenture)
 
-Aplicación en Python que se conecta a la API de Google Gemini utilizando una arquitectura resiliente con múltiples modelos (Fallback), manejo estricto de errores y un banco de prompts validados mediante esquemas JSON estructurados.
+Aplicación en Python y LangChain que se conecta a la API de Google Gemini implementando arquitecturas resilientes con múltiples modelos (Fallback), enrutamiento dinámico de mensajes mediante `RunnableBranch`, manejo estricto de errores y una suite completa de pruebas unitarias automatizadas con `pytest`.
 
 ---
 
@@ -14,22 +14,43 @@ plantilla-repositorio-base/
 │   ├── .gitkeep
 │   ├── diagrama_arquitectura_API.png
 │   ├── eleccion_arquitectura.md
-│   └── evidencia_peticion.png
+│   ├── evidencia_petición.png
+│   ├── limites_métrica.md
+│   └── REVISION_MANUAL.md
 │
 ├── prompts/                   # Banco de prompts estructurados y registros de resultados
 │   ├── registro_resultados.json
 │   └── resultados_metricas.json
 │
-├── src/                       # Código fuente principal de la aplicación
-│   ├── client.py              # Cliente modular y orquestador del modelo
-│   ├── config.py              # Configuración global, modelos y constantes
-│   ├── latency.py             # Mediciones y pruebas de rendimiento/latencia
-│   ├── pipeline_clean_text.py # Limpieza de texto, tokenización y cálculo de métricas F1
-│   └── try_api.py             # Script base de conexión a la API
+├── pruebas/                   # Archivos auxiliares de pruebas y recursos
 │
-├── tests/                     # Pruebas unitarias del código con pytest
+├── src/                       # Código fuente principal de la aplicación
+│   ├── core/                  # Núcleo de configuración y cliente base
+│   │   ├── __init__.py
+│   │   ├── client.py          # Cliente modular y orquestador del modelo
+│   │   ├── config.py          # Configuración global, modelos y constantes
+│   │   └── try_api.py         # Script base de conexión a la API
+│   │
+│   ├── pipelines/             # Cadenas de ejecución y orquestación con LangChain
+│   │   ├── __init__.py
+│   │   ├── chain_3_steps.py   # Cadena secuencial de múltiples pasos
+│   │   ├── pipeline_clean_text.py # Limpieza de texto, tokenización y métricas F1
+│   │   └── router_chain.py    # Router inteligente con RunnableBranch y Fallbacks
+│   │
+│   ├── utils/                 # Utilidades de rendimiento, reportes y métricas
+│   │   ├── __init__.py
+│   │   ├── generate_report_md.py # Generador automatizado de reportes en Markdown
+│   │   └── latency.py         # Mediciones y pruebas de rendimiento/latencia
+│   │
+│   ├── .gitkeep
+│   └── main.py                # Punto de entrada principal de la aplicación
+│
+├── tests/                     # Pruebas unitarias automatizadas con pytest
+│   ├── .gitkeep
+│   ├── test_chain_3_steps.py  # Pruebas para la cadena secuencial
 │   ├── test_client.py         # Pruebas para el cliente modular y resiliencia
-│   └── test_pipeline_clean.py # Pruebas para el pipeline de texto y métricas
+│   ├── test_pipeline_clean.py # Pruebas para el pipeline de texto y métricas
+│   └── test_router_chain.py   # Pruebas unitarias completas para el router de mensajes
 │
 ├── .env.example               # Plantilla de variables de entorno (requiere API Key)
 ├── .env                       # Variables de entorno reales (excluido en .gitignore)
@@ -38,7 +59,6 @@ plantilla-repositorio-base/
 ├── pytest.ini                 # Configuración general para la ejecución de pruebas
 ├── requirements.txt           # Dependencias del proyecto
 └── README.md                  # Instrucciones de instalación y ejecución
-
 ```
 
 ---
@@ -120,6 +140,12 @@ También puedes ejecutar otros scripts ubicados dentro de la carpeta `src/` seg�
 ### ✅ Resiliencia y Fallback
 
 Sistema inteligente que recorre una lista de modelos de respaldo (`gemini-2.5-flash`, `gemini-3.5-flash`, etc.) cuando se detectan errores de disponibilidad o límites de uso (códigos 429 o 503).
+
+### ✅ Resiliencia Nivel Cadena (with_fallbacks)
+Todas las rutas de respuesta están protegidas con cadenas de respaldo (respuesta_generica) mediante .with_fallbacks(), asegurando que ante caídas de red o errores del LLM el sistema devuelva una respuesta cordial y estructurada al usuario en lugar de propagar una excepción.
+
+### ✅ Control Global de Excepciones (procesar_mensaje_seguro)
+Wrapper de entrada con bloque try/except envolviendo la invocación (.invoke()), registrando el error en logs sin interrumpir el flujo ni colapsar la experiencia de usuario.
 
 ### ✅ Manejo Robusto de Errores
 
