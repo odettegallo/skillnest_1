@@ -32,7 +32,7 @@ langsmith==0.14.17
 orjson==3.13.0
 ormsgpack==1.13.0
 packaging==26.3
--e git+https://github.com/odettegallo/skillnest_1.git@71c6f94f049b16f8d4b462305c6ce52c7a4843b2#egg=plantilla_repositorio_base
+-e git+https://github.com/odettegallo/skillnest_1.git@e73e8d61602cd5a2095df9a4d692ffa841b8431e#egg=plantilla_repositorio_base
 pluggy==1.7.0
 pyasn1==0.6.4
 pyasn1_modules==0.4.2
