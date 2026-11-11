@@ -1,11 +1,14 @@
 import logging
 from dotenv import load_dotenv
+from pydantic import BaseModel, Field
 from langchain_core.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_classic.agents import (
     AgentExecutor,
     create_tool_calling_agent,
 )
+from langchain_core.chat_history import InMemoryChatMessageHistory
+from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.prompts import (
     ChatPromptTemplate,
     MessagesPlaceholder,
@@ -18,56 +21,74 @@ from core.config import MODELOS_DISPONIBLES
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
+# Gestión de historiales
+historiales = {}
 
-# Paso 1. Herramientas: el docstring explica CUÁNDO usarlas
-@tool
-def buscar_en_documentacion(consulta: str) -> str:
-    """Busca información en la documentación interna del producto.
+def obtener_historial(session_id: str):
+    """Retorna o crea el historial de conversación según el session_id."""
+    if session_id not in historiales:
+        historiales[session_id] = InMemoryChatMessageHistory()
+    return historiales[session_id]
 
-    Usar solo cuando la pregunta es sobre cómo funcionan los reintentos
-    del cliente o el cálculo de costos. No usar para preguntas generales
-    (contacto, soporte, saludos). Pasar como consulta la palabra clave
-    del tema (ej. 'reintentos', 'costos')."""
-    documentacion = {
-        "reintentos": (
-            "El cliente reintenta hasta 3 veces "
-            "ante un TimeoutError, con espera "
-            "creciente."
-        ),
-        "costos": (
-            "El costo se calcula a partir de "
-            "totalTokenCount, según la tarifa "
-            "vigente."
-        ),
-    }
-    for clave, texto in documentacion.items():
-        if clave in consulta.lower():
-            return texto
-    return (
-        "No se encontró información sobre esa "
-        "consulta en la documentación."
+def cerrar_sesion(session_id: str):
+    """Elimina el historial de una sesión cuando finaliza la conversación."""
+    historiales.pop(session_id, None)
+
+
+# --- Bloque 1: Esquema Pydantic y Herramienta con args_schema ---
+class ArgumentosConsultaEnvio(BaseModel):
+    numero_seguimiento: str = Field(
+        description="Número de seguimiento del envío."
+    )
+    incluir_historial: bool = Field(
+        default=False,
+        description="Si es True, incluye el historial completo."
     )
 
 
+ESTADOS = {
+    "AR12345": {
+        "actual": "en tránsito, llega en 2 días",
+        "historial": [
+            "recibido en depósito",
+            "en tránsito",
+        ],
+    },
+}
+
+
+@tool(
+    "consultar_estado_envio_con_historial",
+    args_schema=ArgumentosConsultaEnvio
+)
+def consultar_estado_envio_detallado(
+    numero_seguimiento: str,
+    incluir_historial: bool = False
+) -> str:
+    """Consulta el estado de un envío, con la opción de incluir su historial completo."""
+    envio = ESTADOS.get(numero_seguimiento)
+    if envio is None:
+        return f"No se encontró un envío con el número {numero_seguimiento}."
+    if not incluir_historial:
+        return envio["actual"]
+    historial = ", ".join(envio["historial"])
+    return f"{envio['actual']} (historial: {historial})"
+
+
 @tool
-def calcular(expresion: str) -> str:
-    """Evalúa una expresión aritmética simple, como '340 + 215'.
-
-    Usar cuando la pregunta requiere un cálculo numérico (sumas,
-    restas, multiplicaciones o divisiones). No usar para preguntas
-    sobre la documentación."""
-    permitido = set("0123456789-+*/(). ")
-    if not set(expresion) <= permitido or "**" in expresion:
-        return "Expresión no permitida."  # '**' bloqueado: evita 9**9**9
-    try:
-        return str(eval(expresion))
-    except Exception as e:
-        return f"Error al evaluar la expresión: {e}"
+def calcular_costo_envio(
+    peso_kg: float,
+    distancia_km: float
+) -> str:
+    """Calcula el costo estimado de un envío según su peso y la distancia a recorrer.
+    Usar cuando el usuario pregunta cuánto va a costar enviar algo."""
+    costo = 500 + (peso_kg * 120) + (distancia_km * 3)
+    return f"El costo estimado es de ${costo:.2f}."
 
 
-# Paso 2. Agente + AgentExecutor con return_intermediate_steps=True
-def construir_ejecutor_agente(modelo_personalizado=None):
-    """Configura y retorna el AgentExecutor con las herramientas, el modelo y sus fallbacks."""
+# --- Bloque 2: Configuración del Agente y Ejecutor ---
+def construir_agente_con_memoria(modelo_personalizado=None):
+    """Configura y retorna el agente con memoria, herramientas y fallbacks."""
     if modelo_personalizado is not None:
         modelo = modelo_personalizado
     else:
@@ -76,18 +97,20 @@ def construir_ejecutor_agente(modelo_personalizado=None):
             model=MODELOS_DISPONIBLES[0], temperature=0
         )
         
-        # Si tienes más modelos en la lista, creamos los fallbacks automáticamente
+        # Soporte de fallbacks automáticos si hay más modelos configurados
         if len(MODELOS_DISPONIBLES) > 1:
             modelos_respaldo = [
                 ChatGoogleGenerativeAI(model=m, temperature=0)
                 for m in MODELOS_DISPONIBLES[1:]
             ]
-            # Configuramos el fallback: si el principal falla (ej. por cuota 429), usa los siguientes
             modelo = modelo_principal.with_fallbacks(modelos_respaldo)
         else:
             modelo = modelo_principal
 
-    herramientas = [buscar_en_documentacion, calcular]
+    herramientas = [
+        consultar_estado_envio_detallado,
+        calcular_costo_envio,
+    ]
 
     prompt_agente = ChatPromptTemplate.from_messages([
         (
@@ -96,6 +119,7 @@ def construir_ejecutor_agente(modelo_personalizado=None):
             "usando las herramientas disponibles cuando "
             "las necesites.",
         ),
+        MessagesPlaceholder("chat_history"),
         ("human", "{entrada}"),
         MessagesPlaceholder("agent_scratchpad"),
     ])
@@ -104,54 +128,44 @@ def construir_ejecutor_agente(modelo_personalizado=None):
         modelo, herramientas, prompt_agente
     )
 
-    return AgentExecutor(
+    ejecutor_agente = AgentExecutor(
         agent=agente,
         tools=herramientas,
         verbose=True,
         return_intermediate_steps=True,
     )
 
-# Paso 3. Validación con intermediate_steps
-def herramientas_usadas(resultado) -> list[str]:
-    """Devuelve los nombres de las tools que el agente eligió."""
-    return [accion.tool for accion, _ in resultado["intermediate_steps"]]
+    # --- Bloque 3: Envoltorio de Memoria entre interacciones ---
+    agente_con_memoria = RunnableWithMessageHistory(
+        ejecutor_agente,
+        obtener_historial,
+        input_messages_key="entrada",
+        history_messages_key="chat_history",
+    )
 
-
-def probar(ejecutor, entrada: str) -> list[str]:
-    """Invoca al agente, muestra su camino y devuelve las tools usadas."""
-    resultado = ejecutor.invoke({"entrada": entrada})
-
-    print(f"\n📥 Entrada: {entrada}")
-    for accion, observacion in resultado["intermediate_steps"]:
-        print(f"🔧 Tool: {accion.tool} | Input: {accion.tool_input}")
-        print(f"   Observación: {observacion}")
-    print(f"📤 Respuesta: {resultado['output']}")
-
-    return herramientas_usadas(resultado)
+    return agente_con_memoria
 
 
 if __name__ == "__main__":
     load_dotenv()
-    print("🤖 Iniciando agente con herramientas...\n")
+    print("🤖 Iniciando agente con herramientas avanzadas y memoria...\n")
 
-    ejecutor_agente = construir_ejecutor_agente()
+    agente_con_memoria = construir_agente_con_memoria()
+    config = {"configurable": {"session_id": "cliente_456"}}
 
-    # Prueba 1: debe disparar 'calcular'
-    usadas = probar(ejecutor_agente, "¿Cuánto es 340 más 215?")
-    assert usadas and usadas[0] == "calcular", f"Usó: {usadas}"
-    print(f"✅ Prueba 1 OK: {usadas}")
-
-    # Prueba 2: debe disparar 'buscar_en_documentacion'
-    usadas = probar(
-        ejecutor_agente,
-        "¿Cómo funcionan los reintentos según la documentación?",
+    # Prueba solicitada en las capturas
+    resultado = agente_con_memoria.invoke(
+        {
+            "entrada": (
+                "¿Cuál es el estado del envío "
+                "AR12345, con su historial?"
+            )
+        },
+        config
     )
-    assert usadas and usadas[0] == "buscar_en_documentacion", f"Usó: {usadas}"
-    print(f"✅ Prueba 2 OK: {usadas}")
 
-    # Prueba 3: pregunta general, no debe usar ninguna tool
-    usadas = probar(ejecutor_agente, "¿Cómo puedo contactar a soporte?")
-    assert usadas == [], (
-        f"El agente usó {usadas}: la descripción de esa tool es muy amplia"
-    )
-    print("✅ Prueba 3 OK: no usó ninguna herramienta")
+    print(f"\n📤 Respuesta: {resultado['output']}")
+
+    # Limpieza final de la sesión
+    cerrar_sesion("cliente_456")
+    print("\n🧹 Sesión cerrada e historial liberado.")
