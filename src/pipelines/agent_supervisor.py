@@ -27,33 +27,44 @@ from agent import (
 # --- Sistema de Supervisión Humana (Compatible con Windows) ---
 registro_aprobaciones = []
 
+# Importación condicional según el sistema operativo
+if sys.platform != "win32":
+    import select
+
+registro_aprobaciones = []
+
 def esperar_aprobacion(mensaje: str, tiempo_limite_segundos: int = 300) -> bool:
-    """Solicita aprobación por consola con timeout compatible para Windows usando hilos."""
     print(mensaje, end="", flush=True)
-    
-    resultado_input = {"respuesta": None}
 
-    def leer_entrada():
-        try:
-            resultado_input["respuesta"] = sys.stdin.readline()
-        except Exception:
-            pass
+    # Si es Linux o macOS, usamos select (nativo y limpio)
+    if sys.platform != "win32":
+        listo, _, _ = select.select([sys.stdin], [], [], tiempo_limite_segundos)
+        if not listo:
+            return False
+        respuesta = sys.stdin.readline()
+    
+    # Si es Windows, usamos el método por hilos que no da error
+    else:
+        resultado_input = {"respuesta": None}
+        def leer_entrada():
+            try:
+                resultado_input["respuesta"] = sys.stdin.readline()
+            except Exception:
+                pass
 
-    hilo = threading.Thread(target=leer_entrada)
-    hilo.daemon = True
-    hilo.start()
-    
-    hilo.join(timeout=tiempo_limite_segundos)
-    
-    if hilo.is_alive():
-        print("\n[⏰ Tiempo de espera agotado. Operación rechazada automáticamente.]")
-        return False
+        hilo = threading.Thread(target=leer_entrada)
+        hilo.daemon = True
+        hilo.start()
+        hilo.join(timeout=tiempo_limite_segundos)
         
-    resp = resultado_input["respuesta"]
-    if resp is None:
+        if hilo.is_alive():
+            print("\n[⏰ Tiempo agotado]")
+            return False
+        respuesta = resultado_input["respuesta"]
+
+    if respuesta is None:
         return False
-        
-    return resp.strip().lower() == "s"
+    return respuesta.strip().lower() == "s"
 
 def registrar_aprobacion(herramienta: str, arguments: dict, aprobado: bool):
     registro_aprobaciones.append({
