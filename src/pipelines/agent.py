@@ -1,7 +1,10 @@
+import os
+import json
 import logging
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from langchain_core.tools import tool
+from datetime import datetime, timezone
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_classic.agents import (
     AgentExecutor,
@@ -146,26 +149,45 @@ def construir_agente_con_memoria(modelo_personalizado=None):
     return agente_con_memoria
 
 
+def registrar_traza(session_id: str, entrada: str, resultado: dict, archivo_salida: str = "prompts/trazas_agent.jsonl") -> None:
+    """Guarda una interacción del agente como una línea JSON en la carpeta indicada."""
+    # Asegurar que la carpeta 'prompt/' exista
+    os.makedirs(os.path.dirname(archivo_salida), exist_ok=True)
+    
+    registro = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "session_id": session_id,
+        "entrada": entrada,
+        "acciones": [
+            {
+                "herramienta": accion.tool,
+                "argumentos": accion.tool_input,
+                "observacion": observacion,
+            }
+            for accion, observacion in resultado.get("intermediate_steps", [])
+        ],
+        "respuestafinal": resultado.get("output", "")
+    }
+    
+    with open(archivo_salida, "a", encoding="utf-8") as archivo:
+        archivo.write(json.dumps(registro, ensure_ascii=False) + "\n")
+
+
 if __name__ == "__main__":
     load_dotenv()
     print("🤖 Iniciando agente con herramientas avanzadas y memoria...\n")
 
     agente_con_memoria = construir_agente_con_memoria()
-    config = {"configurable": {"session_id": "cliente_456"}}
+    session_id = "cliente_456"
+    config = {"configurable": {"session_id": session_id}}
 
-    # Prueba solicitada en las capturas
-    resultado = agente_con_memoria.invoke(
-        {
-            "entrada": (
-                "¿Cuál es el estado del envío "
-                "AR12345, con su historial?"
-            )
-        },
-        config
-    )
+    entrada_texto = "¿Cuál es el estado del envío AR12345, con su historial?"
+    resultado = agente_con_memoria.invoke({"entrada": entrada_texto}, config)
 
     print(f"\n📤 Respuesta: {resultado['output']}")
 
-    # Limpieza final de la sesión
-    cerrar_sesion("cliente_456")
+    # 📌 Guardamos la traza en la carpeta prompt/
+    registrar_traza(session_id, entrada_texto, resultado)
+
+    cerrar_sesion(session_id)
     print("\n🧹 Sesión cerrada e historial liberado.")

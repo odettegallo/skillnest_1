@@ -1,6 +1,8 @@
+import os
 import sys
+import json
 import threading
-from datetime import datetime
+from datetime import datetime, timezone
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from langchain_core.tools import tool
@@ -123,19 +125,44 @@ def construir_agente_supervisor():
         history_messages_key="chat_history",
     )
 
+def registrar_traza(session_id: str, entrada: str, resultado: dict, archivo_salida: str = "prompts/trazas_agent.jsonl") -> None:
+    """Guarda una interacción del agente como una línea JSON en la carpeta indicada."""
+    # Asegurar que la carpeta 'prompt/' exista
+    os.makedirs(os.path.dirname(archivo_salida), exist_ok=True)
+    
+    registro = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "session_id": session_id,
+        "entrada": entrada,
+        "acciones": [
+            {
+                "herramienta": accion.tool,
+                "argumentos": accion.tool_input,
+                "observacion": observacion,
+            }
+            for accion, observacion in resultado.get("intermediate_steps", [])
+        ],
+        "respuestafinal": resultado.get("output", "")
+    }
+    
+    with open(archivo_salida, "a", encoding="utf-8") as archivo:
+        archivo.write(json.dumps(registro, ensure_ascii=False) + "\n")
 
 if __name__ == "__main__":
     load_dotenv()
-    print("🤖 Iniciando agente supervisor modular (Compatible con Windows)...\n")
+    print("🤖 Iniciando agente supervisor modular...\n")
 
     agente_sup = construir_agente_supervisor()
-    config = {"configurable": {"session_id": "supervisor_modular"}}
+    session_id = "supervisor_modular"
+    config = {"configurable": {"session_id": session_id}}
 
-    resultado = agente_sup.invoke(
-        {"entrada": "Por favor genera un reembolso de 1500.0 para el pedido PED789."},
-        config
-    )
+    entrada_texto = "Por favor genera un reembolso de 1500.0 para el pedido PED789."
+    resultado = agente_sup.invoke({"entrada": entrada_texto}, config)
 
     print(f"\n📤 Respuesta final: {resultado['output']}")
-    print(f"\n📋 Auditoría:\n{registro_aprobaciones}")
-    cerrar_sesion("supervisor_modular")
+
+    # 📌 Guardamos la traza en la carpeta prompt/ también
+    registrar_traza(session_id, entrada_texto, resultado)
+
+    cerrar_sesion(session_id)
+    print("\n🧹 Sesión cerrada.")
