@@ -1,6 +1,6 @@
 import json
 
-def marcar_repeticiones_sospechosas(archivo: str = "prompt/trazas_agent.jsonl") -> None:
+def marcar_repeticiones_sospechosas(archivo: str = "prompts/trazas_agent.jsonl") -> None:
     """Recorre el archivo de trazas en formato JSONL y detecta herramientas repetidas consecutivamente."""
     try:
         with open(archivo, "r", encoding="utf-8") as f:

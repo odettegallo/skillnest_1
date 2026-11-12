@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableLambda
-from pipelines.router_chain import (
+from pipelines.chains.router_chain import (
     construir_router, 
     construir_cadena_con_enrutamiento, 
     construir_paso_clasificacion, 
@@ -69,7 +69,7 @@ def test_procesar_mensaje_seguro_no_propaga_excepciones():
     """
     Que ningún fallo, sea cual sea, deje sin respuesta a quien llama a 'procesar_mensaje_seguro'.
     """
-    from pipelines.router_chain import procesar_mensaje_seguro
+    from pipelines.chains.router_chain import procesar_mensaje_seguro
     
     # Creamos un router falso cuyo método .invoke lanza una excepción
     router_roto = MagicMock()

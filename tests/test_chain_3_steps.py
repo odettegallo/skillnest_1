@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 from langchain_core.messages import AIMessage
 
 # Importamos tu función desde la nueva estructura de paquetes
-from pipelines.chain_3_steps import construir_cadena
+from pipelines.chains.chain_3_steps import construir_cadena
 
 
 def test_cadena_conecta_los_tres_pasos():
