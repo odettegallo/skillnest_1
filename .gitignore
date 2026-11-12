@@ -22,4 +22,6 @@ Thumbs.db
 
 # Ignorar pruebas y archivos de prueba
 pruebas/
+
+# Base de datos vectorial local
 vectorstore/
