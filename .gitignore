@@ -25,3 +25,4 @@ pruebas/
 
 # Base de datos vectorial local
 vectorstore/
+vectorstore*
