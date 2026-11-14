@@ -1,31 +1,16 @@
+# format_context.py
 import os
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
 from core.config import MODELOS_DISPONIBLES
-from core.corpus import LISTA_CORPUS
+from core.corpus import LISTA_CORPUS, METADATAS_CORPUS_OFICIAL, CASOS_EVALUACION_OFICIALES
 from core.prompts import PROMPT_TEMPLATE, formatear_contexto
 
 load_dotenv()
 if not os.environ.get("GEMINI_API_KEY"):
     raise SystemExit('Falta GEMINI_API_KEY en el archivo ".env".')
-
-PROMPT_TEMPLATE = PROMPT_TEMPLATE  # Importado desde core.prompts.py
-
-
-def formatear_contexto(chunks_recuperados):
-    """Arma un bloque de contexto numerado para el prompt, y un mapa
-    numero -> fuente para reconstruir la cita despues."""
-    lineas = []
-    citas = {}
-    for i, doc in enumerate(chunks_recuperados, start=1):
-        fuente = doc.metadata.get("fuente", "desconocida")
-        lineas.append(f"[{i}] {doc.page_content}")
-        citas[i] = fuente
-    contexto = "\n\n".join(lineas)
-    return contexto, citas
-
 
 def construir_prompt(pregunta, persist_directory="vectorstore/", k=3):
     """Recupera los k chunks mas relevantes para la pregunta y arma
@@ -63,12 +48,12 @@ def invocar_con_fallback(prompt):
 
 
 if __name__ == "__main__":
-    # --- PASO OPCIONAL DE REINDEXACIÓN ---
-    reindexar = False  # Cambia a True si necesitas reindexar desde cero con metadatas
+    # --- PASO OPCIONAL DE REINDEXACIÓN USANDO EL CORPUS OFICIAL ---
+    reindexar = True  # Activado para asegurar que Chroma use las metadatas oficiales
     
     if reindexar:
         corpus = LISTA_CORPUS
-        metadatas = [{"fuente": f"doc{i}.md"} for i in range(len(corpus))]
+        metadatas = METADATAS_CORPUS_OFICIAL
         ids = [f"doc{i}" for i in range(len(corpus))]
 
         splitter = RecursiveCharacterTextSplitter(chunk_size=200, chunk_overlap=30)
@@ -81,16 +66,16 @@ if __name__ == "__main__":
             ids=ids,
             persist_directory="vectorstore/"
         )
-        print("Vectorstore reindexado correctamente con metadatas e IDs.")
+        print("Vectorstore reindexado correctamente usando CORPUS_OFICIAL y metadatas oficiales.")
 
     print("\n" + "="*50)
-    print("EJECUTANDO ESCENARIOS DE PRUEBA DE LA ACTIVIDAD")
+    print("EJECUTANDO ESCENARIOS DE PRUEBA CON CASOS OFICIALES")
     print("="*50)
 
-    # --- ESCENARIO 1: Dos preguntas distintas (verificar recuperación semántica) ---
-    print("\n[Escenario 1] Probando dos preguntas distintas:")
-    p1 = "Que hace el cliente si hay un TimeoutError?"
-    p2 = "Cuanto cuesta cada llamada?"
+    # --- ESCENARIO 1: Probando preguntas basadas en CASOS_EVALUACION_OFICIALES ---
+    print("\n[Escenario 1] Probando preguntas del corpus oficial:")
+    p1 = CASOS_EVALUACION_OFICIALES[0]["pregunta"]  # "que hace el cliente si una llamada tarda demasiado"
+    p2 = CASOS_EVALUACION_OFICIALES[2]["pregunta"]  # "como se calcula el costo de una llamada"
     
     prompt1, citas1 = construir_prompt(pregunta=p1, persist_directory="vectorstore/", k=2)
     prompt2, citas2 = construir_prompt(pregunta=p2, persist_directory="vectorstore/", k=2)
@@ -98,7 +83,7 @@ if __name__ == "__main__":
     print(f"Pregunta 1: '{p1}' -> Citas obtenidas: {list(citas1.values())}")
     print(f"Pregunta 2: '{p2}' -> Citas obtenidas: {list(citas2.values())}")
 
-    # --- ESCENARIO 2: Pregunta fuera del corpus (evaluar respuesta negativa) ---
+    # --- ESCENARIO 2: Pregunta fuera del corpus ---
     print("\n[Escenario 2] Pregunta que el corpus NO puede responder:")
     pregunta_fuera = "Cual es la capital de Francia?"
     prompt_fuera, _ = construir_prompt(pregunta=pregunta_fuera, persist_directory="vectorstore/", k=2)
@@ -109,7 +94,6 @@ if __name__ == "__main__":
 
     # --- ESCENARIO 3: Verificación manual de una cita ---
     print("\n[Escenario 3] Verificación manual de citas:")
-    # Hacemos una pregunta real y evaluamos la respuesta con el LLM
     prompt_real, citas_real = construir_prompt(pregunta=p1, persist_directory="vectorstore/", k=2)
     respuesta_real, _ = invocar_con_fallback(prompt_real)
     print(f"Pregunta: '{p1}'")
