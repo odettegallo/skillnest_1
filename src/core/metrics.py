@@ -19,3 +19,16 @@ def f1(precision, recall):
 def promediar(valores):
     validos = [v for v in valores if v is not None]
     return sum(validos) / len(validos) if validos else 0.0
+
+def evaluar_recuperacion(retriever, casos, k=3):
+    resultados = []
+    for caso in casos:
+        chunks = retriever.invoke(caso["pregunta"])
+        ids_recuperados = [c.id for c in chunks][:k]
+        p = precision_at_k(ids_recuperados, caso["ids_relevantes"])
+        r = recall_at_k(ids_recuperados, caso["ids_relevantes"])
+        resultados.append({"pregunta": caso["pregunta"], "precision": p, "recall": r})
+    
+    precision_promedio = promediar([x["precision"] for x in resultados])
+    recall_promedio = promediar([x["recall"] for x in resultados])
+    return resultados, precision_promedio, recall_promedio

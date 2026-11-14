@@ -1,0 +1,8 @@
+Fecha: 2026-11-14
+Configuracion: k=3, chunk_size=200, chunk_overlap=30
+0.33 0.33 que hace el cliente si una llamada tarda demasiado
+0.33 0.33 que pasa si la clave de api es invalida
+0.33 0.33 como se calcula el costo de una llamada
+0.33 0.33 como decide el agente que herramienta usar
+
+promedio -> precision: 0.333 recall: 0.333
