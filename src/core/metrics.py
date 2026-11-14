@@ -9,7 +9,7 @@ def recall_at_k(ids_recuperados, ids_relevantes):
     if not ids_relevantes:
         return None
     acertados = [i for i in ids_recuperados if i in ids_relevantes]
-    return len(acertados) / len(ids_recuperados)
+    return len(acertados) / len(ids_relevantes)
 
 def f1(precision, recall):
     if precision + recall == 0:
