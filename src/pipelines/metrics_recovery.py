@@ -1,5 +1,7 @@
 # Metricas de recuperacion: precision@k, recall@k y F1.
 # Solo Python estandar: no necesita instalar ninguna libreria ni una API key.
+from core.corpus import CORPUS_OFICIAL
+
 
 def precision_at_k(ids_recuperados, ids_relevantes):
     """Fraccion de los ids recuperados que de verdad son relevantes."""
@@ -24,14 +26,7 @@ def f1(precision, recall):
 
 if __name__ == "__main__":
     # Datos de partida: corpus de 5 documentos, un chunk por documento
-    corpus = {
-        "doc0": "El cliente reintenta hasta 3 veces ante un TimeOutError, con espera creciente.",
-        "doc1": "Los errores de autenticacion nunca se reintentan: fallan de inmediato con un ValueError.",
-        "doc2": "El costo de cada llamada se calcula a partir de totalTokenCount y la tarifa vigente por cada 1000 tokens.",
-        "doc3": "El agente de la Unidad 2.4 decide por si mismo que herramienta usar, segun la descripcion de cada una.",
-        "doc4": "Las pruebas unitarias del cliente usan mocks, de forma que la suite completa corre en menos de un segundo.",
-    }
-    
+    corpus = CORPUS_OFICIAL
     pregunta = "que hace el cliente si una llamada tarda demasiado?"
     ids_relevantes = {"doc0"} # etiquetado a mano: solo doc0 responde la pregunta
     ids_recuperados = ["doc2", "doc0", "doc4"] # lo que devolvio el retriever con k=3

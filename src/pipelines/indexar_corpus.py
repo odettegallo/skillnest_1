@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
+from core.corpus import LISTA_CORPUS 
 
 load_dotenv()
 
@@ -76,12 +77,8 @@ def cargar_vectorstore(persist_dir=PERSIST_DIR, collection_name=COLLECTION_NAME)
 
 
 if __name__ == "__main__":
-    corpus_prueba = [
-        "El cliente reintenta hasta 3 veces ante un TimeoutError, con espera creciente.",
-        "El costo de cada llamada se calcula a partir de totalTokenCount.",
-        "Las pruebas unitarias del cliente usan mocks y corren en menos de un segundo.",
-    ]
-
+    corpus_prueba = LISTA_CORPUS  # Corpus de ejemplo para indexar
+    
     # Indexamos con la nueva estructura robusta
     indexar_corpus(corpus_prueba)
 

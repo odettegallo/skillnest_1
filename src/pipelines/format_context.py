@@ -4,21 +4,14 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
 from core.config import MODELOS_DISPONIBLES
+from core.corpus import LISTA_CORPUS
+from core.prompts import PROMPT_TEMPLATE, formatear_contexto
 
 load_dotenv()
 if not os.environ.get("GEMINI_API_KEY"):
     raise SystemExit('Falta GEMINI_API_KEY en el archivo ".env".')
 
-PROMPT_TEMPLATE = """Responde la pregunta usando SOLO el contexto de abajo. Cita la \
-fuente de cada afirmacion con su numero entre corchetes, como [1]. Si el contexto no \
-alcanza para responder, dilo explicitamente en vez de inventar.
-
-Contexto:
-{contexto}
-
-Pregunta: {pregunta}
-
-Respuesta:"""
+PROMPT_TEMPLATE = PROMPT_TEMPLATE  # Importado desde core.prompts.py
 
 
 def formatear_contexto(chunks_recuperados):
@@ -74,13 +67,7 @@ if __name__ == "__main__":
     reindexar = False  # Cambia a True si necesitas reindexar desde cero con metadatas
     
     if reindexar:
-        corpus = [
-            "El cliente reintenta hasta 3 veces ante un TimeoutError, con espera creciente.",
-            "Los errores de autenticacion nunca se reintentan: fallan de inmediato con un ValueError.",
-            "El costo de cada llamada se calcula a partir de totalTokenCount y la tarifa vigente por cada 1000 tokens.",
-            "El agente de la Unidad 2.4 decide por si mismo que herramienta usar, segun la descripcion de cada una.",
-            "Las pruebas unitarias del cliente usan mocks, de forma que la suite completa corre en menos de un segundo.",
-        ]
+        corpus = LISTA_CORPUS
         metadatas = [{"fuente": f"doc{i}.md"} for i in range(len(corpus))]
         ids = [f"doc{i}" for i in range(len(corpus))]
 

@@ -1,21 +1,11 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from core.corpus import LISTA_CORPUS, METADATAS_CORPUS_OFICIAL
+from core.prompts import PROMPT_TEMPLATE
 
 # 1. Corpus: documentos de origen, cada uno con su fuente (metadata)
-corpus = [
-    "El cliente reintenta hasta 3 veces ante un TimeoutError, con espera creciente. ",
-    "Los errores de autenticacion nunca se reintentan: fallan de inmediato con un ",
-    "ValueError.",
-    "El costo de cada llamada se calcula a partir de totalTokenCount y la tarifa ",
-    "vigente por cada 1000 tokens."
-]
+corpus = LISTA_CORPUS
 
-metadatas = [
-    {"fuente": "manual_cliente.md"},
-    {"fuente": "manual_cliente.md"},
-    {"fuente": "manual_cliente.md"},
-    {"fuente": "manual_costos.md"},
-    {"fuente": "manual_costos.md"}
-]
+metadatas = METADATAS_CORPUS_OFICIAL
 
 # 2. Chunking: el splitter copia la metadata del documento a cada uno de sus chunks
 splitter = RecursiveCharacterTextSplitter(chunk_size=90, chunk_overlap=10)
@@ -45,16 +35,7 @@ print("\n--- Mapa de citas ---")
 print(citas)
 
 # 4. Prompt que obliga al modelo a citar
-PROMPT_TEMPLATE = """Responde la pregunta usando SOLO el contexto de abajo. Cita la \
-fuente de cada afirmacion con su numero entre corchetes, como [1]. Si el contexto no \
-alcanza para responder, dilo explicitamente en vez de inventar.
-
-Contexto:
-{contexto}
-
-Pregunta: {pregunta}
-
-Respuesta:"""
+PROMPT_TEMPLATE = PROMPT_TEMPLATE  # Importado desde core.prompts.py
 
 prompt = PROMPT_TEMPLATE.format(
     contexto=contexto,

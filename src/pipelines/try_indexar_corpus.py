@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_chroma import Chroma
+from core.corpus import LISTA_CORPUS
 
 # 0. Cargar variables de entorno y verificar clave
 load_dotenv()
@@ -14,13 +15,7 @@ print("="*150)
 print("PASO 1: chunking del corpus de ejemplo")
 print("="*150)
 
-corpus_ejemplo = [
-    "Los pedidos se pueden cancelar dentro de las primeras 24 horas despues de realizados, sin costo adicional.",
-    "Las devoluciones se aceptan hasta 30 dias despues de la entrega, siempre que el producto este sin usar.",
-    "El reembolso se procesa en un plazo de 5 a 10 dias habiles despues de recibir el producto devuelto.",
-    "Los productos en oferta o liquidacion no tienen devolucion, salvo defecto de fabrica.",
-    "El envio de una devolucion corre por cuenta del cliente, excepto cuando el producto llego danado."
-]
+corpus_ejemplo = LISTA_CORPUS  # Usamos el corpus oficial unificado para todas las pruebas y pipelines
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=150, chunk_overlap=20)
 chunks = splitter.create_documents(corpus_ejemplo)

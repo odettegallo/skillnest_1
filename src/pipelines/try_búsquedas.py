@@ -1,20 +1,15 @@
 from langchain_core.embeddings import DeterministicFakeEmbedding
 from langchain_chroma import Chroma
+from core.corpus import LISTA_CORPUS, METADATAS_CORPUS_OFICIAL
 
 # --- PASO 1: Configuración del vector store con embeddings de prueba (sin gastar cuota) ---
 print("=" * 150)
 print("PASO 1: Creando índice con DeterministicFakeEmbedding")
 print("=" * 150)
 
-corpus = [
-    "El cliente reintenta hasta 3 veces ante un TimeoutError, con espera creciente.",
-    "Los errores de autenticacion nunca se reintentan: fallan de inmediato con un ValueError.",
-    "El costo de cada llamada se calcula a partir de totalTokenCount y la tarifa vigente por cada 1000 tokens.",
-    "El agente de la Unidad 2.4 decide por si mismo que herramienta usar, segun la descripcion de cada una.",
-    "Las pruebas unitarias del cliente usan mocks, de forma que la suite completa corre en menos de un segundo.",
-]
+corpus = LISTA_CORPUS
 
-metadatas = [{"fuente": f"doc{i}.md"} for i in range(len(corpus))]
+metadatas = METADATAS_CORPUS_OFICIAL
 
 fake_emb = DeterministicFakeEmbedding(size=16)
 vectorstore_demo = Chroma.from_texts(

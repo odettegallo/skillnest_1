@@ -1,25 +1,10 @@
 # Evaluacion de la recuperacion: precision y recall promedio sobre un conjunto de casos.
 # Python puro: no necesita librerias externas ni una API key.
+from core.corpus import CASOS_EVALUACION_OFICIALES
+
 
 # 1. Conjunto de evaluacion: lista de diccionarios, uno por pregunta
-casos_evaluacion = [
-    {
-        "pregunta": "que hace el cliente si una llamada tarda demasiado",
-        "ids_relevantes": {"doc0"},
-    },
-    {
-        "pregunta": "que pasa si la clave de api es invalida",
-        "ids_relevantes": {"doc1"},
-    },
-    {
-        "pregunta": "como se calcula el costo de una llamada",
-        "ids_relevantes": {"doc2"},
-    },
-    {
-        "pregunta": "como decide el agente que herramienta usar",
-        "ids_relevantes": {"doc3"},
-    },
-]
+casos_evaluacion = CASOS_EVALUACION_OFICIALES
 
 # 2. Metricas, con validaciones para listas vacias
 def precision_at_k(ids_recuperados: list[str], ids_relevantes: set[str]) -> float:
