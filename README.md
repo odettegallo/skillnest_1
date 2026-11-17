@@ -1,7 +1,7 @@
 
 # Especialización en Desarrollo con IA Generativa (Accenture)
 
-Aplicación en Python y LangChain que se conecta a la API de Google Gemini implementando arquitecturas resilientes con múltiples modelos (Fallback), enrutamiento dinámico de mensajes mediante `RunnableBranch`, manejo estricto de errores y una suite completa de pruebas unitarias automatizadas con `pytest`.
+Aplicación en Python y LangChain que se conecta a la API de Google Gemini implementando arquitecturas resilientes con múltiples modelos (Fallback), enrutamiento dinámico de mensajes mediante `RunnableBranch`, pipelines de **Retrieval-Augmented Generation (RAG)** con ChromaDB, agentes autónomos con supervisión, telemetría de latencia/costes y una suite completa de pruebas unitarias automatizadas con `pytest`.
 
 ---
 
