@@ -7,60 +7,88 @@ Aplicación en Python y LangChain que se conecta a la API de Google Gemini imple
 
 ## 📂 Estructura del Proyecto
 
-```text
 plantilla-repositorio-base/
 │
-├── docs/                      # Documentación técnica y diagramas de arquitectura
-│   ├── .gitkeep
+├── docs/                               # Documentación técnica y evidencias
 │   ├── diagrama_arquitectura_API.png
 │   ├── eleccion_arquitectura.md
-│   ├── evidencia_petición.png
-│   ├── limites_métrica.md
+│   ├── evidencia_peticion.png
+│   ├── imagen.png
+│   ├── limites_autonomia_agent.md
+│   ├── limites_metrica.md
 │   └── REVISION_MANUAL.md
 │
-├── prompts/                   # Banco de prompts estructurados y registros de resultados
+├── prompts/                            # Prompts y resultados experimentales
 │   ├── registro_resultados.json
-│   └── resultados_metricas.json
+│   ├── resultados_metricas.json
+│   └── trazas_agent.jsonl
 │
-├── pruebas/                   # Archivos auxiliares de pruebas y recursos
+├── reportes/                           # Logs y resultados de ejecución
+│   ├── registros_latencia_costo.jsonl
+│   └── resultados_evaluacion.txt
 │
-├── src/                       # Código fuente principal de la aplicación
-│   ├── core/                  # Núcleo de configuración y cliente base
+├── pruebas/                            # Recursos auxiliares para pruebas
+│
+├── src/
+│   ├── agents/                         # Agentes y orquestación
 │   │   ├── __init__.py
-│   │   ├── client.py          # Cliente modular y orquestador del modelo
-│   │   ├── config.py          # Configuración global, modelos y constantes
-│   │   └── try_api.py         # Script base de conexión a la API
+│   │   ├── agent.py
+│   │   └── agent_supervisor.py
 │   │
-│   ├── pipelines/             # Cadenas de ejecución y orquestación con LangChain
+│   ├── core/                           # Configuración y componentes base
 │   │   ├── __init__.py
-│   │   ├── chain_3_steps.py   # Cadena secuencial de múltiples pasos
-│   │   ├── pipeline_clean_text.py # Limpieza de texto, tokenización y métricas F1
-│   │   └── router_chain.py    # Router inteligente con RunnableBranch y Fallbacks
+│   │   ├── client.py
+│   │   ├── config.py
+│   │   ├── corpus.py
+│   │   ├── metrics.py
+│   │   ├── prompts.py
+│   │   └── try_api.py
 │   │
-│   ├── utils/                 # Utilidades de rendimiento, reportes y métricas
+│   ├── pipelines/                      # Flujos y pipelines RAG
+│   │   ├── chains/
+│   │   │   ├── __init__.py
+│   │   │   ├── chain_3_steps.py
+│   │   │   └── router_chain.py
+│   │   │
 │   │   ├── __init__.py
-│   │   ├── generate_report_md.py # Generador automatizado de reportes en Markdown
-│   │   └── latency.py         # Mediciones y pruebas de rendimiento/latencia
+│   │   ├── costs_rag.py
+│   │   ├── format_context.py
+│   │   ├── indexar_corpus.py
+│   │   ├── instrumentacion_rag.py
+│   │   ├── metrics_recovery.py
+│   │   ├── pipeline_clean_text.py
+│   │   ├── preflight.py
+│   │   ├── trazabilidad_citas.py
+│   │   ├── try_embeddings.py
+│   │   ├── try_index.py
+│   │   ├── try_indexar_corpus.py
+│   │   ├── try_rag.py
+│   │   ├── try_recovery.py
+│   │   └── try_chunking.py
 │   │
-│   ├── .gitkeep
-│   └── main.py                # Punto de entrada principal de la aplicación
+│   ├── utils/                          # Utilidades de auditoría y reportes
+│   │   ├── __init__.py
+│   │   ├── check_trazas.py
+│   │   ├── generate_report_md.py
+│   │   ├── latency.py
+│   │   └── leer_registro_latencia.py
+│   │
+│   └── main.py                         # Punto de entrada principal
 │
-├── tests/                     # Pruebas unitarias automatizadas con pytest
-│   ├── .gitkeep
-│   ├── test_chain_3_steps.py  # Pruebas para la cadena secuencial
-│   ├── test_client.py         # Pruebas para el cliente modular y resiliencia
-│   ├── test_pipeline_clean.py # Pruebas para el pipeline de texto y métricas
-│   └── test_router_chain.py   # Pruebas unitarias completas para el router de mensajes
+├── tests/                              # Pruebas automáticas con pytest
+│   ├── test_chain_3_steps.py
+│   ├── test_client.py
+│   ├── test_pipeline_clean.py
+│   └── test_router_chain.py
 │
-├── .env.example               # Plantilla de variables de entorno (requiere API Key)
-├── .env                       # Variables de entorno reales (excluido en .gitignore)
-├── .gitignore                 # Archivos y carpetas ignorados por Git
-├── pyproject.toml             # Configuración del paquete y dependencias de desarrollo
-├── pytest.ini                 # Configuración general para la ejecución de pruebas
-├── requirements.txt           # Dependencias del proyecto
-└── README.md                  # Instrucciones de instalación y ejecución
-```
-
+├── vectorstore/                        # Base vectorial persistente (ChromaDB)
+│
+├── .env.example                        # Variables de entorno de ejemplo
+├── .gitignore
+├── pyproject.toml
+├── pytest.ini
+├── requirements.txt
+└── README.md
 ---
 
 ## 🚀 Guía de Instalación y Ejecución
