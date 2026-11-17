@@ -1,5 +1,5 @@
 
-# Proyecto Gate 1 — Especialización en Desarrollo con IA Generativa (Accenture)
+# Especialización en Desarrollo con IA Generativa (Accenture)
 
 Aplicación en Python y LangChain que se conecta a la API de Google Gemini implementando arquitecturas resilientes con múltiples modelos (Fallback), enrutamiento dinámico de mensajes mediante `RunnableBranch`, manejo estricto de errores y una suite completa de pruebas unitarias automatizadas con `pytest`.
 
@@ -13,10 +13,10 @@ plantilla-repositorio-base/
 │   ├── diagrama_arquitectura_API.png
 │   ├── eleccion_arquitectura.md
 │   ├── evidencia_peticion.png
-│   ├── imagen.png
 │   ├── limites_autonomia_agent.md
 │   ├── limites_metrica.md
-│   └── REVISION_MANUAL.md
+|   ├── REVISION_MANUAL.md
+│   └── validacion_revisión_trazas.png
 │
 ├── prompts/                            # Prompts y resultados experimentales
 │   ├── registro_resultados.json
@@ -59,12 +59,13 @@ plantilla-repositorio-base/
 │   │   ├── pipeline_clean_text.py
 │   │   ├── preflight.py
 │   │   ├── trazabilidad_citas.py
+|   |   ├── try_búsquedas.py
+│   │   ├── try_chunking.py
 │   │   ├── try_embeddings.py
 │   │   ├── try_index.py
 │   │   ├── try_indexar_corpus.py
 │   │   ├── try_rag.py
-│   │   ├── try_recovery.py
-│   │   └── try_chunking.py
+│   │   └── try_recovery.py
 │   │
 │   ├── utils/                          # Utilidades de auditoría y reportes
 │   │   ├── __init__.py
@@ -156,10 +157,68 @@ GEMINI_API_KEY=tu_clave_de_api_aqui
 Una vez configurado el entorno y las credenciales, ejecuta:
 
 ```bash
+# Aplicación principal
 python src/main.py
 ```
 
 También puedes ejecutar otros scripts ubicados dentro de la carpeta `src/` según la funcionalidad que quieras probar.
+
+### 6. Ejecutar flujos principales
+
+```bash
+# Indexar el corpus oficial en ChromaDB
+python src/pipelines/indexar_corpus.py
+
+# Ejecutar consulta RAG con instrumentación y registro de latencia/costes
+python src/pipelines/instrumentacion_rag.py
+
+# Auditar el historial de trazas de latencia y costes
+python src/utils/leer_registro_latencia.py
+
+# Ejecutar agentes y supervisión
+python src/agents/agent_supervisor.py
+```
+
+---
+
+# 🏗️ Arquitectura RAG y Agentes
+
+El proyecto implementa una arquitectura moderna basada en LangChain y Google Gemini que combina:
+
+- Recuperación semántica mediante ChromaDB.
+- Embeddings con Gemini Embedding.
+- Generación aumentada por recuperación (RAG).
+- Agentes con selección dinámica de herramientas.
+- Supervisión de límites de autonomía.
+- Instrumentación de latencia y costes.
+- Trazabilidad de citas y auditoría de decisiones.
+
+### Flujo General
+
+```text
+Usuario
+   │
+   ▼
+Consulta
+   │
+   ▼
+Retriever (ChromaDB)
+   │
+   ▼
+Contexto Recuperado
+   │
+   ▼
+Pipeline RAG
+   │
+   ▼
+Gemini LLM
+   │
+   ▼
+Respuesta con citas
+   │
+   ▼
+Telemetría + Logs + Auditoría
+```
 
 ---
 
@@ -167,25 +226,65 @@ También puedes ejecutar otros scripts ubicados dentro de la carpeta `src/` seg�
 
 ### ✅ Resiliencia y Fallback
 
-Sistema inteligente que recorre una lista de modelos de respaldo (`gemini-2.5-flash`, `gemini-3.5-flash`, etc.) cuando se detectan errores de disponibilidad o límites de uso (códigos 429 o 503).
+Sistema inteligente que recorre una lista de modelos de respaldo (`gemini-3.5-flash`, `gemini-3.5-flash-lite`, `gemini-2.5-flash`, etc.) cuando se detectan errores de disponibilidad o límites de uso (`429` o `503`).
 
-### ✅ Resiliencia Nivel Cadena (with_fallbacks)
-Todas las rutas de respuesta están protegidas con cadenas de respaldo (respuesta_generica) mediante .with_fallbacks(), asegurando que ante caídas de red o errores del LLM el sistema devuelva una respuesta cordial y estructurada al usuario en lugar de propagar una excepción.
+### ✅ Resiliencia Nivel Cadena (`with_fallbacks`)
 
-### ✅ Control Global de Excepciones (procesar_mensaje_seguro)
-Wrapper de entrada con bloque try/except envolviendo la invocación (.invoke()), registrando el error en logs sin interrumpir el flujo ni colapsar la experiencia de usuario.
+Todas las rutas de respuesta están protegidas mediante `.with_fallbacks()`, asegurando que ante caídas de red o errores del LLM el sistema entregue una respuesta controlada y amigable.
 
-### ✅ Manejo Robusto de Errores
+### ✅ Control Global de Excepciones (`procesar_mensaje_seguro`)
 
-Implementación de validaciones y excepciones controladas (`ValueError`, `RuntimeError`) para evitar fallos silenciosos y facilitar la depuración.
+Wrapper principal basado en `try/except` que captura errores de ejecución, registra eventos en logs y evita la interrupción del flujo de usuario.
 
-### ✅ Banco de Prompts y Schemas
+### ✅ Pipeline RAG, Recuperación y Trazabilidad de Citas
 
-Validación estricta de respuestas JSON mediante esquemas predefinidos que garantizan consistencia estructural y facilidad de procesamiento.
+Incluye:
 
-### ✅ Pipeline de Texto y Métricas (F1)
+- Fragmentación de documentos con `RecursiveCharacterTextSplitter`.
+- Generación de embeddings usando `models/gemini-embedding-001`.
+- Persistencia vectorial en `vectorstore/`.
+- Recuperación semántica con ChromaDB.
+- Citación estricta de fuentes (`[1]`, `[2]`, etc.).
 
-Limpieza de texto, tokenización y cálculo automatizado de métricas de Precisión, Cobertura y F1 comparando respuestas generadas por la IA frente a textos de referencia, clasificando el desempeño e identificando los peores casos para su revisión.
+### ✅ Agentes Autónomos y Supervisión
+
+Implementación de agentes mediante:
+
+- `src/agents/agent.py`
+- `src/agents/agent_supervisor.py`
+
+Características:
+
+- Selección dinámica de herramientas.
+- Límites de autonomía.
+- Auditoría completa de decisiones.
+- Registro de actividad en `prompts/trazas_agent.jsonl`.
+
+### ✅ Instrumentación de Latencia y Cálculo Dinámico de Costes
+
+Mide:
+
+- Latencia de embeddings.
+- Tiempo de recuperación.
+- Tiempo de generación.
+- Tokens de entrada y salida.
+- Coste estimado por ejecución.
+
+Resultados almacenados en:
+
+```text
+reports/registros_latencia_costo.jsonl
+```
+
+### ✅ Banco de Prompts, Schemas y Métricas (F1 / Retrieval)
+
+Incluye validación estructurada de respuestas JSON y métricas como:
+
+- Precisión
+- Cobertura
+- Recall
+- F1 Score
+- Evaluación de recuperación semántica
 
 
 ---
