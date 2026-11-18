@@ -5,15 +5,39 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-try:
-    print("google-genai instalado, versión", version("google-genai"))
-except PackageNotFoundError:
-    raise SystemExit("Falta la librería. Ejecuta: pip install google-genai python-dotenv")
+PAQUETES_REQUERIDOS = [
+    "google-genai",
+    "langchain-google-genai",
+    "langchain-chroma",
+    "chromadb",
+    "python-dotenv",
+]
 
+print("=== VERIFICACIÓN DE ENTORNO (PREFLIGHT) ===\n")
+
+faltantes = []
+for paquete in PAQUETES_REQUERIDOS:
+    try:
+        v = version(paquete)
+        print(f"[OK] {paquete} instalado (versión {v})")
+    except PackageNotFoundError:
+        print(f"[ERROR] {paquete} NO encontrado")
+        faltantes.append(paquete)
+
+if faltantes:
+    raise SystemExit(
+        f"\nFaltan librerías críticas: {', '.join(faltantes)}. "
+        "Ejecuta: pip install -r requirements.txt"
+    )
+
+print()
 if os.environ.get("GEMINI_API_KEY"):
-    print("GEMINI_API_KEY detectada")
+    print("[OK] GEMINI_API_KEY detectada en el entorno.")
+    print("\nTodo listo para ejecutar los pipelines y agentes.")
 else:
-    raise SystemExit('Falta GEMINI_API_KEY. Agrégala al archivo ".env" de tu proyecto.')
+    raise SystemExit(
+        '[ERROR] Falta GEMINI_API_KEY. Agrégala al archivo ".env" en la raíz de tu proyecto.'
+    )
 
 def preflight_check(persist_directory, gitignore_path=".gitignore"):
     """Confirma, sin llamar a ninguna API, que lo basico del flujo esta en orden."""
