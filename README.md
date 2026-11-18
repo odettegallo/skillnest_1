@@ -49,7 +49,16 @@ plantilla-repositorio-base/
 │   │   │   ├── __init__.py
 │   │   │   ├── chain_3_steps.py
 │   │   │   └── router_chain.py
-│   │   │
+│   │   ├── try/
+│   │   │   ├── __init__.py
+|   |   |   ├── try_búsquedas.py
+│   │   |   ├── try_chunking.py
+│   │   |   ├── try_embeddings.py
+│   │   |   ├── try_index.py
+│   │   |   ├── try_indexar_corpus.py
+│   │   |   ├── try_rag.py
+│   │   |   └── try_recovery.py
+|   |   |
 │   │   ├── __init__.py
 │   │   ├── costs_rag.py
 │   │   ├── format_context.py
@@ -58,14 +67,8 @@ plantilla-repositorio-base/
 │   │   ├── metrics_recovery.py
 │   │   ├── pipeline_clean_text.py
 │   │   ├── preflight.py
-│   │   ├── trazabilidad_citas.py
-|   |   ├── try_búsquedas.py
-│   │   ├── try_chunking.py
-│   │   ├── try_embeddings.py
-│   │   ├── try_index.py
-│   │   ├── try_indexar_corpus.py
-│   │   ├── try_rag.py
-│   │   └── try_recovery.py
+│   │   └── trazabilidad_citas.py
+|   |   
 │   │
 │   ├── utils/                          # Utilidades de auditoría y reportes
 │   │   ├── __init__.py
