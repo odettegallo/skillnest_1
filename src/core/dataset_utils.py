@@ -56,3 +56,11 @@ def esperar_a_que_termine(client, nombre_trabajo, intervalo_segundos=30):
         if trabajo.state in estados_finales:
             return trabajo
         time.sleep(intervalo_segundos)
+
+def estimar_costo_de_etiquetar(
+    num_ejemplos: float, minutos_por_ejemplo: float, costo_por_hora: float
+) -> tuple[float, float]:
+    """Estima horas de trabajo humano y costo total para etiquetar o revisar ejemplos."""
+    horas = (num_ejemplos * minutos_por_ejemplo) / 60
+    costo = horas * costo_por_hora
+    return horas, costo

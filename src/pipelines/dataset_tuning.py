@@ -24,7 +24,10 @@ print(f"Muestra [0]: {examples[0]}\n")
 print("=== 2. BALANCE DEL DATASET ===")
 balance = chequear_balance(ejemplos_raw, clave="intencion")
 for categoria, cuenta in balance.most_common():
-    print(f"{categoria}: {cuenta}")
+    if cuenta == 1: 
+       print(f"{categoria}: {cuenta} ejemplo") 
+    else: 
+       print(f"{categoria}: {cuenta} ejemplos")
 print()
 
 # 3. Validación local antes de enviar
