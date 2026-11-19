@@ -8,6 +8,7 @@ PAQUETES_REQUERIDOS = [
     "google-genai",
     "langchain-google-genai",
     "langchain-chroma",
+    "langchain-core",
     "chromadb",
     "python-dotenv",
 ]
