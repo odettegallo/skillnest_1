@@ -10,12 +10,22 @@ from langchain_core.callbacks import BaseCallbackHandler
 trace_id_var: ContextVar[Optional[str]] = ContextVar("trace_id", default=None)
 
 
-def huella_texto(texto: str) -> str:
-    return hashlib.sha256(texto.encode("utf-8")).hexdigest()[:12]
+def _a_texto(valor: Any) -> str:
+    if isinstance(valor, str):
+        return valor
+    if isinstance(valor, (dict, list)):
+        return json.dumps(valor, ensure_ascii=False)
+    return str(valor) if valor is not None else ""
 
 
-def resumen_gobernado(texto: str) -> Dict[str, Any]:
-    return {"chars": len(texto), "huella": huella_texto(texto)}
+def huella_texto(texto: Any) -> str:
+    texto_str = _a_texto(texto)
+    return hashlib.sha256(texto_str.encode("utf-8")).hexdigest()[:12]
+
+
+def resumen_gobernado(texto: Any) -> Dict[str, Any]:
+    texto_str = _a_texto(texto)
+    return {"chars": len(texto_str), "huella": huella_texto(texto_str)}
 
 
 class JsonFormatter(logging.Formatter):
@@ -35,6 +45,7 @@ class JsonFormatter(logging.Formatter):
 def obtener_logger_json(
     nombre: str = "agente_trazas",
     archivo_jsonl: Optional[str] = None,
+    consola: bool = True,
 ) -> logging.Logger:
     logger = logging.getLogger(nombre)
     logger.setLevel(logging.INFO)
@@ -42,9 +53,11 @@ def obtener_logger_json(
     logger.propagate = False
 
     formatter = JsonFormatter()
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
+
+    if consola:
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
 
     if archivo_jsonl:
         file_handler = logging.FileHandler(archivo_jsonl, encoding="utf-8")
@@ -52,7 +65,6 @@ def obtener_logger_json(
         logger.addHandler(file_handler)
 
     return logger
-
 
 class CallbackObservabilidad(BaseCallbackHandler):
     def __init__(self, logger: logging.Logger) -> None:

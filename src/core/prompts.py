@@ -20,3 +20,30 @@ def formatear_contexto(chunks_recuperados):
         citas[i] = fuente
     contexto = "\n\n".join(lineas)
     return contexto, citas
+
+def _extraer_texto_respuesta(respuesta) -> str:
+    contenido = getattr(respuesta, "content", "")
+    if isinstance(contenido, str):
+        return contenido.strip()
+
+    if isinstance(contenido, list):
+        partes = []
+        for bloque in contenido:
+            if isinstance(bloque, str):
+                partes.append(bloque)
+            elif isinstance(bloque, dict):
+                if isinstance(bloque.get("text"), str):
+                    partes.append(bloque["text"])
+                elif isinstance(bloque.get("content"), str):
+                    partes.append(bloque["content"])
+            else:
+                texto_attr = getattr(bloque, "text", None)
+                if isinstance(texto_attr, str):
+                    partes.append(texto_attr)
+
+        texto_unido = "\n".join(p.strip() for p in partes if p and p.strip()).strip()
+        if texto_unido:
+            return texto_unido
+
+    texto_final = str(contenido).strip()
+    return texto_final if texto_final not in ("", "[]") else ""

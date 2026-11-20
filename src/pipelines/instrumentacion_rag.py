@@ -11,7 +11,7 @@ from langchain_chroma import Chroma
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 
 from core.config import MODELOS_DISPONIBLES, TARIFAS_MODELOS
-from core.prompts import PROMPT_TEMPLATE, formatear_contexto
+from core.prompts import PROMPT_TEMPLATE, formatear_contexto, _extraer_texto_respuesta
 from utils.observability import (
     CallbackObservabilidad,
     obtener_logger_json,
@@ -54,7 +54,7 @@ def registrar_consulta(
 ):
     """Corre una consulta RAG real con fallback de modelos, trace_id y callbacks de observabilidad."""
     Path(archivo_trazas).parent.mkdir(parents=True, exist_ok=True)
-    logger = obtener_logger_json("rag_observabilidad", archivo_jsonl=archivo_trazas)
+    logger = obtener_logger_json("rag_observabilidad", archivo_jsonl=archivo_trazas, consola=False)
     callback = CallbackObservabilidad(logger)
 
     trace_id = f"trace-{uuid.uuid4().hex[:8]}"
@@ -123,6 +123,7 @@ def registrar_consulta(
             "modelo_utilizado": modelo_utilizado,
             "pregunta_resumen": resumen_gobernado(pregunta),
             "respuesta_resumen": resumen_gobernado(respuesta.content),
+            "respuesta_texto": _extraer_texto_respuesta(respuesta),
             "citas_fuentes": citas,
             "k": k,
             "tiempos_ms": {etapa: round(s * 1000, 2) for etapa, s in tiempos.items()},
@@ -133,3 +134,73 @@ def registrar_consulta(
         return registro
     finally:
         trace_id_var.reset(token_ctx)
+
+def _extraer_texto_respuesta(respuesta) -> str:
+    contenido = getattr(respuesta, "content", "")
+    if isinstance(contenido, str):
+        return contenido
+    if isinstance(contenido, list):
+        partes = []
+        for bloque in contenido:
+            if isinstance(bloque, dict) and bloque.get("type") == "text":
+                partes.append(bloque.get("text", ""))
+            elif isinstance(bloque, str):
+                partes.append(bloque)
+        return "\n".join(p for p in partes if p).strip()
+    return str(contenido)
+
+if __name__ == "__main__":
+    ruta_vectorstore = "vectorstore/"
+    if not Path(ruta_vectorstore).exists():
+        print(
+            f"[AVISO] No se encontró '{ruta_vectorstore}'. "
+            "Ejecuta primero el script de indexación para crearlo."
+        )
+
+    pregunta = "¿Qué hace el cliente si hay un TimeoutError y cómo se calcula el costo?"
+
+    print("=" * 60)
+    print("PASO 1: EJECUCIÓN RAG Y TRAZAS (guardadas en reports/trazas_rag.jsonl)")
+    print("=" * 60)
+    registro = registrar_consulta(
+        pregunta=pregunta,
+        persist_directory=ruta_vectorstore,
+        k=3,
+        archivo_trazas="reports/trazas_rag.jsonl",
+    )
+    print(f"Trace ID : {registro['trace_id']}")
+    print(f"Modelo   : {registro['modelo_utilizado']}")
+    print(f"Fuentes  : {registro['citas_fuentes']}")
+
+    print("\n" + "=" * 60)
+    print("PASO 2: MÉTRICAS DE LATENCIA Y COSTO")
+    print("=" * 60)
+    print(f"Búsqueda (ms) : {registro['tiempos_ms'].get('embed_y_busqueda')}")
+    print(f"Generación (ms) : {registro['tiempos_ms'].get('generacion')}")
+    print(f"Total (ms)      : {registro['tiempo_total_ms']}")
+    if registro.get("tokens"):
+        tokens = registro["tokens"]
+        print(
+            f"Tokens          : in={tokens.get('input_tokens')} | "
+            f"out={tokens.get('output_tokens')} | "
+            f"total={tokens.get('total_tokens')}"
+        )
+    print(f"Costo est. USD  : {registro.get('costo_estimado_usd')}")
+
+    ruta_log = Path("reports/registros_latencia_costo.jsonl")
+    ruta_log.parent.mkdir(parents=True, exist_ok=True)
+    with open(ruta_log, "a", encoding="utf-8") as f:
+        f.write(json.dumps(registro, ensure_ascii=False) + "\n")
+
+    ruta_trazas = Path("reports/trazas_rag.jsonl")
+
+    print("\n" + "=" * 60)
+    print("PASO 3: ARCHIVOS GENERADOS")
+    print("=" * 60)
+    print(f"- Eventos paso a paso : {ruta_trazas}")
+    print(f"- Métricas y costos   : {ruta_log}")
+
+    print("\n" + "=" * 60)
+    print("RESPUESTA DEL MODELO")
+    print("=" * 60)
+    print(registro.get("respuesta_texto") or "(Sin contenido de texto)")
