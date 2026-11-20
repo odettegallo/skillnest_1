@@ -1,4 +1,4 @@
-Fecha: 2026-11-14
+Fecha: 2026-11-20
 Configuracion: k=3 vs k=5, chunk_size=200, chunk_overlap=30
 
 0.33 1.00 que hace el cliente si una llamada tarda demasiado

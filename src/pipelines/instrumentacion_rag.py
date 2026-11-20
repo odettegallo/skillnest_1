@@ -18,6 +18,7 @@ from utils.observability import (
     resumen_gobernado,
     trace_id_var,
 )
+from utils.security import filtrar_documentos_sospechosos
 
 load_dotenv()
 
@@ -46,13 +47,31 @@ def calcular_costo_real(usage_metadata, modelo):
     return round(costo_in + costo_out, 8)
 
 
+def registrar_consumo(logger, respuesta, modelo, costo_usd):
+    """Paso 2: deja el consumo de la llamada en el log, con el trace_id de la consulta."""
+    uso = respuesta.usage_metadata or {}
+    logger.info(
+        "consumo registrado",
+        extra={
+            "extra_data": {
+                "evento": "consumo_llm",
+                "modelo": modelo,
+                "input_tokens": uso.get("input_tokens"),
+                "output_tokens": uso.get("output_tokens"),
+                "total_tokens": uso.get("total_tokens"),
+                "costo_usd": costo_usd,
+            }
+        },
+    )
+
+
 def registrar_consulta(
     pregunta,
     persist_directory="vectorstore/",
     k=3,
     archivo_trazas="reports/trazas_rag.jsonl",
 ):
-    """Corre una consulta RAG real con fallback de modelos, trace_id y callbacks de observabilidad."""
+    """Consulta RAG real con trace_id, filtro anti-inyección, fallback de modelos y registro de consumo."""
     Path(archivo_trazas).parent.mkdir(parents=True, exist_ok=True)
     logger = obtener_logger_json("rag_observabilidad", archivo_jsonl=archivo_trazas, consola=False)
     callback = CallbackObservabilidad(logger)
@@ -63,10 +82,12 @@ def registrar_consulta(
 
     try:
         logger.info(
-            "consulta_recibida",
+            "consulta recibida",
             extra={
                 "trace_id": trace_id,
                 "extra_data": {
+                    "evento": "consulta_recibida",
+                    "pregunta_len": len(pregunta),
                     "k": k,
                     "pregunta_resumen": resumen_gobernado(pregunta),
                 },
@@ -84,7 +105,42 @@ def registrar_consulta(
             retriever = vectorstore.as_retriever(search_kwargs={"k": k})
             chunks = retriever.invoke(pregunta, config=config_run)
 
-        contexto, citas = formatear_contexto(chunks)
+        # Paso 3 + 4: filtrar ANTES de construir el prompt
+        chunks_limpios, descartados = filtrar_documentos_sospechosos(chunks, logger)
+        logger.info(
+            "contexto filtrado",
+            extra={
+                "extra_data": {
+                    "evento": "contexto_filtrado",
+                    "n_recuperados": len(chunks),
+                    "n_limpios": len(chunks_limpios),
+                    "n_descartados": len(descartados),
+                }
+            },
+        )
+
+        if not chunks_limpios:
+            logger.warning(
+                "sin contexto seguro",
+                extra={"extra_data": {"evento": "sin_contexto_seguro"}},
+            )
+            return {
+                "trace_id": trace_id,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "modelo_utilizado": None,
+                "pregunta_resumen": resumen_gobernado(pregunta),
+                "respuesta_resumen": None,
+                "respuesta_texto": "No encontré contexto seguro para responder esta consulta.",
+                "citas_fuentes": [],
+                "k": k,
+                "n_descartados": len(descartados),
+                "tiempos_ms": {etapa: round(s * 1000, 2) for etapa, s in tiempos.items()},
+                "tiempo_total_ms": round(sum(tiempos.values()) * 1000, 2),
+                "tokens": None,
+                "costo_estimado_usd": None,
+            }
+
+        contexto, citas = formatear_contexto(chunks_limpios)
         prompt = PROMPT_TEMPLATE.format(contexto=contexto, pregunta=pregunta)
 
         respuesta = None
@@ -116,6 +172,7 @@ def registrar_consulta(
 
         tokens_reales = dict(respuesta.usage_metadata) if respuesta.usage_metadata else None
         costo_usd = calcular_costo_real(tokens_reales, modelo_utilizado)
+        registrar_consumo(logger, respuesta, modelo_utilizado, costo_usd)
 
         registro = {
             "trace_id": trace_id,
@@ -126,6 +183,7 @@ def registrar_consulta(
             "respuesta_texto": _extraer_texto_respuesta(respuesta),
             "citas_fuentes": citas,
             "k": k,
+            "n_descartados": len(descartados),
             "tiempos_ms": {etapa: round(s * 1000, 2) for etapa, s in tiempos.items()},
             "tiempo_total_ms": round(sum(tiempos.values()) * 1000, 2),
             "tokens": tokens_reales,
@@ -135,19 +193,6 @@ def registrar_consulta(
     finally:
         trace_id_var.reset(token_ctx)
 
-def _extraer_texto_respuesta(respuesta) -> str:
-    contenido = getattr(respuesta, "content", "")
-    if isinstance(contenido, str):
-        return contenido
-    if isinstance(contenido, list):
-        partes = []
-        for bloque in contenido:
-            if isinstance(bloque, dict) and bloque.get("type") == "text":
-                partes.append(bloque.get("text", ""))
-            elif isinstance(bloque, str):
-                partes.append(bloque)
-        return "\n".join(p for p in partes if p).strip()
-    return str(contenido)
 
 if __name__ == "__main__":
     ruta_vectorstore = "vectorstore/"
@@ -168,14 +213,15 @@ if __name__ == "__main__":
         k=3,
         archivo_trazas="reports/trazas_rag.jsonl",
     )
-    print(f"Trace ID : {registro['trace_id']}")
-    print(f"Modelo   : {registro['modelo_utilizado']}")
-    print(f"Fuentes  : {registro['citas_fuentes']}")
+    print(f"Trace ID      : {registro['trace_id']}")
+    print(f"Modelo        : {registro['modelo_utilizado']}")
+    print(f"Fuentes       : {registro['citas_fuentes']}")
+    print(f"Descartados   : {registro.get('n_descartados')}")
 
     print("\n" + "=" * 60)
     print("PASO 2: MÉTRICAS DE LATENCIA Y COSTO")
     print("=" * 60)
-    print(f"Búsqueda (ms) : {registro['tiempos_ms'].get('embed_y_busqueda')}")
+    print(f"Búsqueda (ms)   : {registro['tiempos_ms'].get('embed_y_busqueda')}")
     print(f"Generación (ms) : {registro['tiempos_ms'].get('generacion')}")
     print(f"Total (ms)      : {registro['tiempo_total_ms']}")
     if registro.get("tokens"):
