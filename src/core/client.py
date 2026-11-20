@@ -4,7 +4,7 @@ import time
 import requests
 
 # Importamos las funciones base desde try_api.py y la configuración
-from core.try_api import (
+from core.client_api import (
     enviar_peticion_con_fallback,
     extraer_texto,
     parsear_respuesta_json,

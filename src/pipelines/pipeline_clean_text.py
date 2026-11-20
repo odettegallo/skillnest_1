@@ -1,7 +1,7 @@
 import re
 import json
 from collections import Counter
-from core import try_api
+from core import client_api
 from core.client import consultar_modelo 
 from core.config import CASOS_EVALUACION
 
