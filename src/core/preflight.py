@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 PAQUETES_REQUERIDOS = [
     "google-genai",
+    "langgraph",
+    "langgraph-checkpoint-sqlite",
     "langchain-google-genai",
     "langchain-chroma",
     "langchain-core",
