@@ -6,16 +6,19 @@ Aplicación en Python y LangChain que se conecta a la API de Google Gemini imple
 ---
 
 ## 📂 Estructura del Proyecto
-
+```text
 plantilla-repositorio-base/
 │
+├── checkpoints/                        # Persistencia de estados y checkpoints (SQLite / LangGraph)
+│
 ├── docs/                               # Documentación técnica y evidencias
+│   ├── decision_personalizacion.md
 │   ├── diagrama_arquitectura_API.png
 │   ├── eleccion_arquitectura.md
 │   ├── evidencia_peticion.png
-│   ├── limites_autonomia_agent.md
+│   ├── limites_autonomía_agent.md
 │   ├── limites_metrica.md
-|   ├── REVISION_MANUAL.md
+│   ├── REVISION_MANUAL.md
 │   └── validacion_revisión_trazas.png
 │
 ├── prompts/                            # Prompts y resultados experimentales
@@ -23,59 +26,72 @@ plantilla-repositorio-base/
 │   ├── resultados_metricas.json
 │   └── trazas_agent.jsonl
 │
-├── reportes/                           # Logs y resultados de ejecución
+├── reports/                            # Logs, trazas y resultados de ejecución
+│   ├── eventos_agente.jsonl
+│   ├── eventos_supervisor.jsonl
 │   ├── registros_latencia_costo.jsonl
-│   └── resultados_evaluacion.txt
-│
-├── pruebas/                            # Recursos auxiliares para pruebas
+│   ├── resultados_evaluacion.txt
+│   └── trazas_rag.jsonl
 │
 ├── src/
 │   ├── agents/                         # Agentes y orquestación
-│   │   ├── __init__.py
 │   │   ├── agent.py
 │   │   └── agent_supervisor.py
 │   │
-│   ├── core/                           # Configuración y componentes base
-│   │   ├── __init__.py
+│   ├── core/                           # Configuración, seguridad, métricas y componentes base
+│   │   ├── client_api.py
 │   │   ├── client.py
 │   │   ├── config.py
 │   │   ├── corpus.py
+│   │   ├── dataset_utils.py
+│   │   ├── dataset.py
 │   │   ├── metrics.py
+│   │   ├── preflight.py
+│   │   ├── prompt_registry.py
 │   │   ├── prompts.py
-│   │   └── try_api.py
+│   │   ├── risks.py
+│   │   └── strategy.py
 │   │
-│   ├── pipelines/                      # Flujos y pipelines RAG
+│   ├── pipelines/                      # Flujos RAG, tuning, supervisión y pruebas exploratorias
 │   │   ├── chains/
-│   │   │   ├── __init__.py
 │   │   │   ├── chain_3_steps.py
 │   │   │   └── router_chain.py
+│   │   │
 │   │   ├── try/
-│   │   │   ├── __init__.py
-|   |   |   ├── try_búsquedas.py
-│   │   |   ├── try_chunking.py
-│   │   |   ├── try_embeddings.py
-│   │   |   ├── try_index.py
-│   │   |   ├── try_indexar_corpus.py
-│   │   |   ├── try_rag.py
-│   │   |   └── try_recovery.py
-|   |   |
-│   │   ├── __init__.py
+│   │   │   ├── try_búsquedas.py
+│   │   │   ├── try_chunking.py
+│   │   │   ├── try_dataset.py
+│   │   │   ├── try_decision.py
+│   │   │   ├── try_embeddings.py
+│   │   │   ├── try_index.py
+│   │   │   ├── try_indexar_corpus.py
+│   │   │   ├── try_instrumentacion_rag.py
+│   │   │   ├── try_pasos_1_a_3.py
+│   │   │   ├── try_rag.py
+│   │   │   ├── try_recovery.py
+│   │   │   ├── try_strategy.py
+│   │   │   ├── try_tuning_costs.py
+│   │   │   └── try_tuning_stats.py
+│   │   │
+│   │   ├── aprobar_prompt.py
 │   │   ├── costs_rag.py
+│   │   ├── dataset_tuning.py
+│   │   ├── demo_aprobar_prompt.py
 │   │   ├── format_context.py
 │   │   ├── indexar_corpus.py
 │   │   ├── instrumentacion_rag.py
 │   │   ├── metrics_recovery.py
 │   │   ├── pipeline_clean_text.py
-│   │   ├── preflight.py
 │   │   └── trazabilidad_citas.py
-|   |   
 │   │
-│   ├── utils/                          # Utilidades de auditoría y reportes
-│   │   ├── __init__.py
+│   ├── utils/                          # Observabilidad, seguridad, latencia y formato
 │   │   ├── check_trazas.py
+│   │   ├── formato_supervision.py
 │   │   ├── generate_report_md.py
 │   │   ├── latency.py
-│   │   └── leer_registro_latencia.py
+│   │   ├── leer_registro_latencia.py
+│   │   ├── observability.py
+│   │   └── security.py
 │   │
 │   └── main.py                         # Punto de entrada principal
 │
@@ -83,17 +99,18 @@ plantilla-repositorio-base/
 │   ├── test_chain_3_steps.py
 │   ├── test_client.py
 │   ├── test_pipeline_clean.py
+│   ├── test_prompts_y_supervision.py
 │   └── test_router_chain.py
 │
 ├── vectorstore/                        # Base vectorial persistente (ChromaDB)
-│
+├── vectorstore_ejemplo/                # Base vectorial de ejemplo / pruebas
 ├── .env.example                        # Variables de entorno de ejemplo
 ├── .gitignore
 ├── pyproject.toml
 ├── pytest.ini
 ├── requirements.txt
 └── README.md
----
+```
 
 ## 🚀 Guía de Instalación y Ejecución
 
@@ -155,20 +172,12 @@ Abre el archivo `.env` y agrega tu clave real de Google Gemini:
 GEMINI_API_KEY=tu_clave_de_api_aqui
 ```
 
-### 5. Ejecutar la aplicación
-
-Una vez configurado el entorno y las credenciales, ejecuta:
+### 5. Ejecutar flujos principales
 
 ```bash
 # Aplicación principal
 python src/main.py
-```
 
-También puedes ejecutar otros scripts ubicados dentro de la carpeta `src/` según la funcionalidad que quieras probar.
-
-### 6. Ejecutar flujos principales
-
-```bash
 # Indexar el corpus oficial en ChromaDB
 python src/pipelines/indexar_corpus.py
 
@@ -180,64 +189,53 @@ python src/utils/leer_registro_latencia.py
 
 # Ejecutar agentes y supervisión
 python src/agents/agent_supervisor.py
+
+# Ejecutar flujo de aprobación/rechazo de prompts y matriz de riesgos
+python src/pipelines/demo_aprobar_prompt.py
+python src/pipelines/try/try_pasos_1_a_3.py
 ```
 
 ---
 
 # 🏗️ Arquitectura RAG y Agentes
 
-El proyecto implementa una arquitectura moderna basada en LangChain y Google Gemini que combina:
-
-- Recuperación semántica mediante ChromaDB.
-- Embeddings con Gemini Embedding.
-- Generación aumentada por recuperación (RAG).
-- Agentes con selección dinámica de herramientas.
-- Supervisión de límites de autonomía.
-- Instrumentación de latencia y costes.
-- Trazabilidad de citas y auditoría de decisiones.
+El proyecto combina recuperación semántica con ChromaDB, embeddings de Gemini, pipelines RAG con trazabilidad de citas, agentes con supervisión, control de seguridad ante *prompt injection*, versionado de prompts con huella SHA-256 + `diff`, aprobación humana en LangGraph (`interrupt` + `Command`) y evaluación de matriz de riesgos.
 
 ### Flujo General
 
 ```text
-Usuario
+Usuario / Propuesta de Prompt
    │
    ▼
-Consulta
+Validación y Seguridad (security.py / preflight.py)
    │
    ▼
-Retriever (ChromaDB)
+Retriever (ChromaDB) / Grafo de Supervisión (LangGraph)
    │
    ▼
-Contexto Recuperado
+Contexto Recuperado / Decisión Humana (Command resume)
    │
    ▼
-Pipeline RAG
+Pipeline RAG o Despliegue Controlado
    │
    ▼
-Gemini LLM
-   │
-   ▼
-Respuesta con citas
-   │
-   ▼
-Telemetría + Logs + Auditoría
+Telemetría, Logs JSONL (observability.py / reports/) y Auditoría
 ```
 
 ---
 
 ## 🛡️ Características Principales Implementadas
 
-### ✅ Resiliencia y Fallback
+### ✅ Resiliencia, Fallback y Control de Excepciones
 
-Sistema inteligente que recorre una lista de modelos de respaldo (`gemini-3.5-flash`, `gemini-3.5-flash-lite`, `gemini-2.5-flash`, etc.) cuando se detectan errores de disponibilidad o límites de uso (`429` o `503`).
+- Rotación y respaldo entre modelos ante errores de cuota o disponibilidad (`429` / `503`).
+- Cadenas protegidas con `.with_fallbacks()` y manejo seguro de errores.
 
-### ✅ Resiliencia Nivel Cadena (`with_fallbacks`)
+### ✅ Pipeline RAG y Trazabilidad de Citas
 
-Todas las rutas de respuesta están protegidas mediante `.with_fallbacks()`, asegurando que ante caídas de red o errores del LLM el sistema entregue una respuesta controlada y amigable.
-
-### ✅ Control Global de Excepciones (`procesar_mensaje_seguro`)
-
-Wrapper principal basado en `try/except` que captura errores de ejecución, registra eventos en logs y evita la interrupción del flujo de usuario.
+- Fragmentación con `RecursiveCharacterTextSplitter`.
+- Embeddings con `models/gemini-embedding-001` y persistencia en `vectorstore/`.
+- Citación explícita de fuentes (`[1]`, `[2]`, etc.) y análisis de costes/tiempos en `src/pipelines/costs_rag.py`.
 
 ### ✅ Pipeline RAG, Recuperación y Trazabilidad de Citas
 
@@ -289,6 +287,25 @@ Incluye validación estructurada de respuestas JSON y métricas como:
 - F1 Score
 - Evaluación de recuperación semántica
 
+### ✅ Versionado de Prompts, Supervisión Humana y Matriz de Riesgos
+
+- Huella SHA-256 corta, historial de versiones y comparación palabra a palabra con `difflib.unified_diff` en `src/core/prompt_registry.py`.
+- Flujo de supervisión con `StateGraph`, `interrupt()`, `get_state()`, `Command(resume=True/False)` y persistencia en `SqliteSaver` (`src/pipelines/aprobar_prompt.py` y `src/pipelines/demo_aprobar_prompt.py`).
+- Cálculo de puntaje, categoría (`CRITICO`, `ALTO`, `MEDIO`, `BAJO`) y detección de casos `[AL LIMITE]` en `src/core/risks.py` y `src/pipelines/try/try_pasos_1_a_3.py`.
+
+### ✅ Seguridad y Observabilidad
+
+- Detección de patrones de *prompt injection* y filtrado de documentos en `src/utils/security.py`.
+- Logs estructurados en JSON con `trace_id` y callbacks en `src/utils/observability.py`, con trazas en `reports/` y `prompts/`.
+
+### ✅ Preparación de Datasets y Tuning
+
+- Validación de esquemas JSON, chequeo de balance entre categorías y estimación de esfuerzo/coste de etiquetado en:
+  - `src/core/dataset_utils.py`
+  - `src/core/dataset.py`
+  - `src/pipelines/dataset_tuning.py`
+
+---
 
 ---
 
@@ -410,9 +427,10 @@ pytest tests/ -v
 La carpeta `docs/` contiene:
 
 - Diagramas de arquitectura.
-- Justificación de decisiones técnicas.
-- Evidencias de ejecución y pruebas.
-- Capturas solicitadas para la evaluación del proyecto.
+- Decisiones técnicas.
+- Revisiones manuales.
+- Evidencias de ejecución.
+- Validaciones de trazabilidad y supervisión.
 
 ---
 
