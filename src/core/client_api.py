@@ -6,6 +6,7 @@ import random
 import requests
 from dotenv import load_dotenv
 from core.config import MODELOS_DISPONIBLES, BANCO_DE_PROMPTS, TARIFAS_MODELOS
+from core.metrics import calcular_costo_por_tokens
 
 # Carga las variables del archivo .env
 load_dotenv()
@@ -166,27 +167,33 @@ def calcular_costo(datos_json, precio_entrada, precio_salida):
 costo_total_sesion = 0.0
 
 def registrar_costo(datos_json: dict, modelo: str) -> float:
-    """Extrae el conteo de tokens de usageMetadata, busca la tarifa por millón 
-    del modelo correspondiente en TARIFAS_MODELOS y acumula el costo de la sesión.
-    """
+    """Extrae tokens de usageMetadata, calcula el costo y acumula la sesión."""
     global costo_total_sesion
     try:
         uso = datos_json.get("usageMetadata", {})
         tokens_entrada = uso.get("promptTokenCount", 0)
         tokens_salida = uso.get("candidatesTokenCount", 0)
-        
-        # Obtenemos las tarifas del modelo (por defecto usamos gemini-2.5-flash si no se encuentra)
-        tarifas = TARIFAS_MODELOS.get(modelo, {"entrada": 0.075, "salida": 0.30})
-        
-        precio_entrada_por_token = tarifas["entrada"] / 1_000_000
-        precio_salida_por_token = tarifas["salida"] / 1_000_000
-        
-        costo_estimado = (tokens_entrada * precio_entrada_por_token) + (tokens_salida * precio_salida_por_token)
+
+        tarifas_con_fallback = {
+            **TARIFAS_MODELOS,
+            modelo: TARIFAS_MODELOS.get(modelo, {"entrada": 0.075, "salida": 0.30}),
+        }
+        costo_estimado = (
+            calcular_costo_por_tokens(
+                tokens_entrada,
+                tokens_salida,
+                modelo,
+                tarifas_modelos=tarifas_con_fallback,
+            )
+            or 0.0
+        )
         costo_total_sesion += costo_estimado
-        
+
         print(f"   📊 [{modelo}] Tokens -> Entrada: {tokens_entrada}, Salida: {tokens_salida}")
-        print(f"      Costo operación: ${costo_estimado:.6f} USD (Acumulado sesión: ${costo_total_sesion:.6f} USD)")
-        
+        print(
+            f"      Costo operación: ${costo_estimado:.6f} USD "
+            f"(Acumulado sesión: ${costo_total_sesion:.6f} USD)"
+        )
         return costo_estimado
     except Exception as e:
         print(f"   ⚠️ No se pudo registrar el costo: {e}")

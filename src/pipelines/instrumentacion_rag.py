@@ -19,6 +19,7 @@ from utils.observability import (
     trace_id_var,
 )
 from utils.security import filtrar_documentos_sospechosos
+from core.metrics import calcular_costo_por_tokens
 
 load_dotenv()
 
@@ -34,17 +35,15 @@ def medir(tiempos, etapa):
 
 
 def calcular_costo_real(usage_metadata, modelo):
-    """Calcula el costo en USD usando los tokens reales reportados por la API y la tarifa del modelo activo."""
-    if not usage_metadata or modelo not in TARIFAS_MODELOS:
+    """Calcula el costo en USD usando usage_metadata de LangChain."""
+    if not usage_metadata:
         return None
-
-    tarifa = TARIFAS_MODELOS[modelo]
-    tokens_in = usage_metadata.get("input_tokens", 0)
-    tokens_out = usage_metadata.get("output_tokens", 0)
-
-    costo_in = (tokens_in / 1_000_000) * tarifa["entrada"]
-    costo_out = (tokens_out / 1_000_000) * tarifa["salida"]
-    return round(costo_in + costo_out, 8)
+    return calcular_costo_por_tokens(
+        tokens_entrada=usage_metadata.get("input_tokens", 0),
+        tokens_salida=usage_metadata.get("output_tokens", 0),
+        modelo=modelo,
+        redondear=8,
+    )
 
 
 def registrar_consumo(logger, respuesta, modelo, costo_usd):
@@ -204,9 +203,9 @@ if __name__ == "__main__":
 
     pregunta = "¿Qué hace el cliente si hay un TimeoutError y cómo se calcula el costo?"
 
-    print("=" * 60)
+    print("=" * 160)
     print("PASO 1: EJECUCIÓN RAG Y TRAZAS (guardadas en reports/trazas_rag.jsonl)")
-    print("=" * 60)
+    print("=" * 160)
     registro = registrar_consulta(
         pregunta=pregunta,
         persist_directory=ruta_vectorstore,

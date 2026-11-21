@@ -1,4 +1,27 @@
 # src/core/metricas.py
+from core.config import TARIFAS_MODELOS
+
+
+def calcular_costo_por_tokens(
+    tokens_entrada: int,
+    tokens_salida: int,
+    modelo: str,
+    tarifas_modelos: dict = TARIFAS_MODELOS,
+    redondear: int | None = None,
+) -> float | None:
+    """Calcula el costo en USD a partir de tokens reales y tarifa por millón."""
+    if modelo not in tarifas_modelos:
+        return None
+
+    tarifas = tarifas_modelos[modelo]
+    entrada_in = tokens_entrada or 0
+    salida_out = tokens_salida or 0
+
+    costo = (entrada_in / 1_000_000) * tarifas["entrada"] + (
+        salida_out / 1_000_000
+    ) * tarifas["salida"]
+    return round(costo, redondear) if redondear is not None else costo
+
 def precision_at_k(ids_recuperados, ids_relevantes):
     if not ids_recuperados:
         return 0.0
