@@ -27,5 +27,5 @@ pruebas/
 vectorstore/
 vectorstore*
 
-checkpoints.db/
+checkpoints/
 checkpoints.db
