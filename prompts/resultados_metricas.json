@@ -1,162 +1,162 @@
 [
   {
     "consulta": "¿Qué es Python?",
-    "respuesta": "**Python** es uno de los lenguajes de programación más populares, versátiles y utilizados en el mundo. Fue creado por Guido van Rossum y lanzado por primera vez en 1991.\n\nAquí te explico sus características principales, para qué sirve y por qué es tan famoso:\n\n---\n\n### 1. Características principales\n* **Fácil de leer y aprender:** Su sintaxis es muy limpia y se asemeja mucho al idioma inglés. A diferencia de otros lenguajes (como C++ o Java), no requiere",
+    "respuesta": "**Python** es uno de los lenguajes de programación más populares, potentes y fáciles de aprender en el mundo. Fue creado por el programador holandés Guido van Rossum y lanzado en 1991.\n\nAquí te explico sus características principales, para qué sirve y por qué es tan famoso:\n\n---\n\n### 1. Características principales\n* **Fácil de leer y escribir:** La sintaxis (la forma de escribir las instrucciones) de Python es muy limpia y se parece mucho al idioma inglés. Esto hace que sea ideal para principiantes.\n* **Lenguaje de propósito general:** No está diseñado para una sola cosa; con Python puedes crear desde aplicaciones web hasta inteligencia artificial.\n* **Interpretado:** No necesitas \"compilar\" el código antes de ejecutarlo. Lo escribes y puedes probarlo de inmediato, lo que acelera el",
     "referencia": "Python es un lenguaje de programación de alto nivel, interpretado, de código abierto y multiparadigma. Es reconocido por su sintaxis clara y legible, ideal para desarrollo web, análisis de datos, inteligencia artificial y automatización de procesos.",
-    "precision": 0.2,
-    "cobertura": 0.4166666666666667,
-    "f1": 0.2702702702702703
+    "precision": 0.18032786885245902,
+    "cobertura": 0.6111111111111112,
+    "f1": 0.2784810126582279
   },
   {
     "consulta": "¿Cuándo se creó Python?",
-    "respuesta": "Python fue creado a finales de la década de 1980 por el programador holandés **Guido van Rossum**, pero tiene dos fechas clave que marcan su origen:\n\n1. **Diciembre de 1989:** Guido van Rossum empezó a escribir el código del lenguaje como un proyecto personal durante las vacaciones de Navidad.\n2. **20 de febrero de 1991:** Se lanzó la **primera versión pública** (Python 0.9.0). Esta se considera la fecha oficial de nacimiento de Python.\n\n**Dato curioso:** El nombre \"Python\" no proviene de la serpiente, sino del programa de televisión de comedia británico *Monty Python's Flying Circus*, del cual Guido van Rossum era un gran admirador.",
+    "respuesta": "El lenguaje de programación Python fue concebido a finales de la década de 1980, pero su **primera versión pública (la 0.9.0)** fue lanzada el **20 de febrero de 1991**.\n\nFue creado por el programador holandés **Guido van Rossum** en el Centro de Matemáticas e Informática (CWI) en los Países Bajos. Van Rossum empezó a desarrollar Python en diciembre de 1989 como un proyecto personal durante sus vacaciones de Navidad.",
     "referencia": "Python fue creado a finales de los años 80 por Guido van Rossum en los Países Bajos, y su primera versión oficial (0.9.0) fue publicada en febrero de 1991.",
-    "precision": 0.17307692307692307,
-    "cobertura": 0.6206896551724138,
-    "f1": 0.27067669172932335
+    "precision": 0.3333333333333333,
+    "cobertura": 0.7931034482758621,
+    "f1": 0.46938775510204084
   },
   {
     "consulta": "¿Qué es una lista en Python?",
-    "respuesta": "En Python, una **lista** es una estructura de datos que se utiliza para almacenar una colección de elementos (valores o variables) en un solo lugar. Es uno de los tipos de datos más utilizados y versátiles en Python.\n\nPara crear una lista, los elementos se encierran entre **corchetes `[]`** y se separan por **comas**.\n\n### Ejemplo básico:\n```python\n# Una lista de frutas (strings)\nfrutas = [\"manzana\", \"banana\", \"naranja\"]\n\n# Una lista de números (integers)\nnumeros = [1, 2, 3, 4, 5]\n```\n\n---\n\n### Características principales de las listas:\n\n1. **Ordenadas:** Los elementos mantienen un orden específico. Cada elemento tiene una posición fija llamada **índice** (em",
+    "respuesta": "En **Python**, una **lista** es una estructura de datos que se utiliza para almacenar una colección ordenada de elementos (objetos). Es uno de los tipos de datos más utilizados y versátiles en este lenguaje.\n\nPara definirlas, se utilizan **corchetes `[]`** y los elementos dentro de la lista se separan por comas.\n\n### Ejemplo básico:\n```python\n# Una lista de números\nnumeros = [1, 2, 3, 4, 5]\n\n# Una lista de cadenas de texto (strings)\nfrutas = [\"manzana\", \"banana\", \"cereza\"]\n\n# Una lista con diferentes tipos de datos (heterogénea)\nmixta = [10, \"Hola\", 3.14, True]\n```\n\n---\n\n### Características principales de las listas:\n\n1. **Ordenadas:** Los elementos",
     "referencia": "En Python, una lista es una estructura de datos integrada que permite almacenar una colección ordenada y mutable de elementos entre corchetes.",
-    "precision": 0.1836734693877551,
+    "precision": 0.1875,
     "cobertura": 0.8181818181818182,
-    "f1": 0.3
+    "f1": 0.30508474576271183
   },
   {
     "consulta": "¿Qué es un diccionario en Python?",
-    "respuesta": "Un **diccionario** en Python es una estructura de datos que permite almacenar información en forma de pares **clave-valor** (*key-value*). \n\nPara entenderlo fácilmente, piensa en un diccionario físico de idioma: buscas una palabra (la **clave**) para encontrar su definición (el **valor**). Otro ejemplo muy claro es una agenda de contactos: el nombre de la persona es la clave y su número de teléfono es el valor.\n\n---\n\n",
+    "respuesta": "Un **diccionario** en Python es una estructura de datos que permite almacenar información en forma de **pares clave-valor** (*key-value*). \n\nEs muy similar a un diccionario del mundo real: usas una **palabra** (la clave) para buscar su **definición** (el valor).\n\n---\n\n### Sintaxis Básica\n\nLos diccionarios se crean utilizando llaves `{}` y separando las claves de los valores con dos puntos `:`:\n\n```python\n# Creación de un diccionario\npersona",
     "referencia": "Un diccionario es una estructura de datos mutable que almacena pares de clave y valor, permitiendo búsquedas rápidas mediante claves únicas.",
-    "precision": 0.2,
-    "cobertura": 0.6190476190476191,
-    "f1": 0.3023255813953489
+    "precision": 0.2222222222222222,
+    "cobertura": 0.6666666666666666,
+    "f1": 0.3333333333333333
   },
   {
     "consulta": "¿Qué es una tupla en Python?",
-    "respuesta": "Una **tupla** en Python es una estructura de datos que se utiliza para almacenar una colección ordenada de elementos. Es muy similar a una lista, pero con una diferencia fundamental: **es inmutable**.\n\nAquí te explico sus características principales",
+    "respuesta": "Una **tupla** en Python es una estructura de datos utilizada para almacenar una colección **ordenada e inmutable** de elementos. \n\nPara entenderlas fácilmente, puedes pensarlas como \"listas que no se pueden modificar\".\n\n---\n\n### Características principales de una tupla\n\n1. **Inmutable:** Una vez que creas una tupla, no puedes cambiar, agregar ni eliminar sus elementos.\n2. **Ordenada:** Los elementos mantienen un orden específico. El primer elemento tiene el índice `[0]`, el segundo `[1]`, etc.\n3. **Permite duplicados:** Puede contener elementos con el mismo",
     "referencia": "Una tupla es una estructura de datos similar a una lista pero inmutable, es decir, sus elementos no pueden ser modificados una vez creada la tupla.",
-    "precision": 0.4473684210526316,
-    "cobertura": 0.6538461538461539,
-    "f1": 0.53125
+    "precision": 0.2,
+    "cobertura": 0.6153846153846154,
+    "f1": 0.30188679245283023
   },
   {
     "consulta": "¿Para qué sirve la función print en Python?",
-    "respuesta": "La función **`print()`** en Python sirve para **mostrar información en la pantalla** (ya sea en la consola, terminal o entorno de desarrollo). \n\nEs una de las funciones más básicas y utilizadas en Python. Sus usos principales son:\n\n### 1. Mostrar mensajes o texto al usuario\nPuedes escribir cualquier texto entre comillas (dobles `\"\"` o simples `''`).\n```python\nprint(\"¡Hola, mundo!\")\n# Salida: ¡Hola, mundo!\n```\n\n### 2. Ver el valor de las variables\nEs muy útil para comprobar qué datos están guardados en tus variables.\n```python\nnombre = \"Carlos\"\nedad = 25\n\nprint(nombre)\nprint(edad)\n# Salida: \n# Carlos\n# 25\n```\n\n### 3. Combinar texto y variables\nPuedes imprimir varias cosas a la vez separándolas con comas, o usando texto formateado (f-strings).\n```python\nnombre = \"Ana\"\npuntos = 100\n\n# Usando comas (añade un espacio automáticamente):\nprint(\"El usuario\", nombre, \"tiene\", puntos, \"puntos.\")\n\n# Usando f-strings (la forma más moderna y recomendada):\nprint(f\"El usuario {nombre} tiene {puntos} puntos.\")\n\n# Salida en ambos casos: El usuario Ana tiene 100 puntos.",
+    "respuesta": "La función **`print()`** en Python sirve para **mostrar información en la pantalla** (en la consola o terminal). \n\nEs una de las funciones más básicas e importantes del lenguaje, ya que permite al programa comunicarse con el usuario o con el programador.\n\nAquí te detallo sus usos principales y cómo funciona:\n\n---\n\n### 1. Mostrar textos simples\nPuedes imprimir cualquier cadena de texto escribiéndola entre comillas (dobles o simples):\n```python\nprint(\"¡Hola, mundo!\")\nprint(\"Bienvenido a Python\")\n```\n\n### 2. Mostrar valores de variables\nSirve para ver qué valor tiene guardado una variable en un momento determinado:\n```python\nnombre = \"Ana\"\nedad = 25\n\nprint(nombre)  # Imprime: Ana\nprint(edad)  # Imprime: 25\n```\n\n### 3. Mostrar múltiples elementos a la vez\nPuedes imprimir varios datos separados por comas. Por defecto, Python les añadirá un espacio entre ellos:\n```python\nnombre = \"Carlos\"\npuntos = 100\n\nprint(\"El jugador\", nombre, \"tiene\", puntos, \"puntos.\")\n# Salida: El jugador Carlos tiene 10",
     "referencia": "La función print se utiliza para mostrar mensajes o valores de variables en la consola o salida estándar.",
-    "precision": 0.09395973154362416,
+    "precision": 0.09929078014184398,
     "cobertura": 0.7777777777777778,
-    "f1": 0.16766467065868265
+    "f1": 0.1761006289308176
   },
   {
     "consulta": "¿Qué es pip en Python?",
-    "respuesta": "**`pip`** es el **gestor de paquetes oficial de Python**. \n\nSu nombre es un acrónimo recursivo que significa *\"Pip Installs Packages\"* (Pip Instala Paquetes).\n\nEn términos sencillos, es una herramienta de línea de comandos que te permite **instalar, actualizar y administrar librerías o módulos de terceros** que no vienen incluidos por defecto en la instalación estándar de Python.\n\n---\n\n### Una analogía muy fácil:\nPiensa en `pip` como la **App Store** o **Google Play Store** de tu teléfono, pero para código de Python:\n* Si necesitas una función que Python no tiene por defecto (por ejemplo, para procesar imágenes, hacer ciencia de datos o crear páginas web), la buscas en internet y la instalas en tu computadora usando `pip`.\n\n---\n\n### ¿De dónde descarga los paquetes?\n`pip` se conecta por defecto a **PyPI** (*Python Package Index*), un repositorio público gigantesco donde la comunidad global de desarrolladores de Python comparte miles de",
+    "respuesta": "**`pip`** es el **gestor de paquetes estándar de Python**. Es una herramienta de línea de comandos que te permite instalar, actualizar, configurar y eliminar librerías (módulos o paquetes) externas que no vienen incluidas por defecto en la biblioteca estándar de Python.\n\nEl nombre \"pip\" es un acrónimo recursivo que significa *\"Pip Installs Packages\"* (Pip Instala Paquetes) o *\"Preferred Installer Program\"*.\n\n---\n\n### La analogía sencilla\nPiensa en `pip` como la **App Store** o **Google Play Store** de tu teléfono, pero para código de Python:\n* Si quieres jugar, vas a la App Store y descargas un juego.\n",
     "referencia": "Pip es el sistema de gestión de paquetes estándar para Python, utilizado para instalar y administrar bibliotecas de terceros que no vienen en la biblioteca estándar.",
-    "precision": 0.13793103448275862,
-    "cobertura": 0.7692307692307693,
-    "f1": 0.23391812865497078
+    "precision": 0.20212765957446807,
+    "cobertura": 0.7307692307692307,
+    "f1": 0.31666666666666665
   },
   {
     "consulta": "¿Qué es un entorno virtual en Python?",
-    "respuesta": "Un **entorno virtual en Python** es una herramienta que permite crear **espacios de trabajo aislados** para diferentes proyectos. \n\nEn términos sencillos, es como una \"caja de herramientas personalizada\" para un proyecto específico. Dentro de esa caja guardas una versión concreta de Python y las librerías (paquetes) que ese",
+    "respuesta": "Un **entorno virtual en Python** es un directorio o carpeta aislada que contiene una instalación de Python independiente y un conjunto de librerías (paquetes) específicas para un proyecto determinado.\n\nEn pocas palabras: **es un \"espacio de trabajo aislado\" para cada uno de tus proyectos.**\n\n---\n\n### ¿Por qué son necesarios? (El problema que resuelven)\n\nImagina que estás trabajando en dos proyectos diferentes en tu computadora:\n\n*   **Proyecto A:** Una página web antigua que necesita la versión 2.2 de Django.\n*   **Proyecto B:** Un sistema nuevo que necesita la versión 4.1 de",
     "referencia": "Un entorno virtual es un directorio aislado que contiene una instalación de Python y las dependencias específicas de un proyecto, evitando conflictos entre versiones.",
-    "precision": 0.2708333333333333,
-    "cobertura": 0.5416666666666666,
-    "f1": 0.36111111111111105
+    "precision": 0.20689655172413793,
+    "cobertura": 0.75,
+    "f1": 0.32432432432432434
   },
   {
     "consulta": "¿Qué es el tipado dinámico en Python?",
-    "respuesta": "El **tipado dinámico** en Python significa que el tipo de dato de una variable se evalúa y se asigna **en tiempo de ejecución** (mientras el programa se está ejecutando",
+    "respuesta": " Dynamically Typed):*\n        *Self-Correction/Detail:* Mention that Python is *dynamically typed* BUT *strongly typed* (tipado fuerte). Python won't implicitly cast `\"",
     "referencia": "El tipado dinámico significa que el tipo de una variable se determina en tiempo de ejecución y no es necesario declararlo explícitamente al escribir el código.",
-    "precision": 0.5862068965517241,
-    "cobertura": 0.6538461538461539,
-    "f1": 0.6181818181818182
+    "precision": 0.05555555555555555,
+    "cobertura": 0.038461538461538464,
+    "f1": 0.04545454545454546
   },
   {
     "consulta": "¿Qué es la programación orientada a objetos?",
-    "respuesta": "Fácil mantenimiento y modularidad.\n        *   Escalabilidad.\n\n    *   *Languages (Lenguajes):* Java, Python, C++, C#, JavaScript",
+    "respuesta": "La **Programación Orientada a Objetos (POO)** —o *OOP* por sus siglas en inglés— es un **paradigma de programación**, es decir, un estilo o modelo de",
     "referencia": "Es un paradigma de programación basado en el concepto de clases y objetos, que agrupan datos y comportamientos relacionados.",
-    "precision": 0.08333333333333333,
-    "cobertura": 0.05263157894736842,
-    "f1": 0.06451612903225808
+    "precision": 0.32,
+    "cobertura": 0.42105263157894735,
+    "f1": 0.3636363636363636
   },
   {
     "consulta": "¿Qué es Git?",
-    "respuesta": "**Git** es un **sistema de control de versiones distribuido**. En términos sencillos, es una herramienta que rastrea los cambios en los archivos de un proyecto a lo largo del tiempo. \n\nAunque se puede usar para cualquier tipo de archivo, es la herramienta estándar fundamental utilizada por los desarrolladores de software en todo el mundo.\n\nPara entenderlo mejor, piensa en Git como una **\"máquina del tiempo\"** para tus proyectos o como el historial de cambios de un documento, pero mucho",
+    "respuesta": "**Git** es un **sistema de control de versiones distribuido**, gratuito y de código abierto, diseñado para rastrear los cambios en cualquier conjunto de archivos. Aunque se usa principalmente para el desarrollo de software, se puede utilizar para gestionar cualquier tipo de proyecto donde los archivos cambien con el tiempo.\n\nPara entenderlo de forma sencilla, imagínalo como una **\"máquina del tiempo\"** o un **sistema de \"puntos de guardado\" (como en los videojuegos)** para tus proyectos.\n\n---\n\n### ¿Para qué sirve Git?\n\n1. **Guardar el historial completo:** Git registra quién hizo qué cambio, cuándo lo hizo y por qué. Si cometes un error, puedes \"viajar al pasado\" y restaurar una versión anterior que funcionaba.\n2. **Facilitar el trabajo en equipo:** Permite que decenas o cientos",
     "referencia": "Git es un sistema de control de versiones distribuido diseñado para rastrear cambios en el código fuente durante el desarrollo de software.",
-    "precision": 0.20253164556962025,
-    "cobertura": 0.7272727272727273,
-    "f1": 0.31683168316831684
+    "precision": 0.1652892561983471,
+    "cobertura": 0.9090909090909091,
+    "f1": 0.2797202797202797
   },
   {
     "consulta": "¿Qué es Docker?",
-    "respuesta": "**Docker** es una plataforma de código abierto (*open source*) que permite a los desarrolladores crear, probar y desplegar aplicaciones rápidamente mediante el uso de **contenedores**.\n\nPara entenderlo de forma sencilla, Docker soluciona el famoso problema de los programadores: *\"Funciona en mi computadora, pero no en el servidor\"*.\n\n---\n\n### La metáfora de los barcos de carga\n\nPiensa en los **contenedores marítimos reales**: no importa si transportan comida, coches o ropa, todos tienen un tamaño estándar. Los barcos, grúas y camiones pueden moverlos sin importar lo que haya dentro.\n\nDocker hace",
+    "respuesta": "**Docker** es una plataforma de código abierto diseñada para facilitar la creación, el despliegue y la ejecución de aplicaciones mediante el uso de **contenedores**.\n\nPara entenderlo de forma sencilla, imagina los **contenedores de carga de los barcos**: no importa lo que haya dentro (comida, coches, ropa), todos tienen un tamaño estándar y se pueden mover fácilmente en cualquier barco, tren o camión. Docker hace exactamente lo mismo, pero con el software.\n\n---\n\n### El problema principal que resuelve Docker\n\nAntes de",
     "referencia": "Docker es una plataforma de código abierto que permite empaquetar aplicaciones y sus dependencias en contenedores ligeros y portables.",
-    "precision": 0.1590909090909091,
-    "cobertura": 0.7368421052631579,
-    "f1": 0.2616822429906542
+    "precision": 0.16455696202531644,
+    "cobertura": 0.6842105263157895,
+    "f1": 0.26530612244897955
   },
   {
     "consulta": "¿Qué es una función lambda?",
-    "respuesta": "Una **función lambda** (también conocida como **función anónima**) es una función pequeña y rápida que **no tiene un nombre asignado** y que generalmente se define en una sola línea de código.\n\nSe utilizan principalmente para realizar tareas cortas y puntuales donde definir una función tradicional (con nombre) resultaría innecesariamente largo o repetitivo.\n\n---\n\n### Características principales\n\n1. **Es anónima:** No requiere una palabra clave tradicional de declaración (como `def` en Python o `function` en JavaScript) ni un nombre identificador.\n2. **Es corta:** Suele consistir en una sola expresión cuyo resultado se devuelve automáticamente.\n3. **Se define \"in-situ\" (inline):** Se crea justo en el lugar donde",
+    "respuesta": "Una **función lambda** (también conocida como función anónima) es una función pequeña y sin nombre que se define en una sola línea de código. \n\nSe utiliza principalmente para realizar tareas simples, cortas y puntuales donde no vale la pena crear una función tradicional completa mediante la sintaxis habitual (como `def` en Python o `function` en JavaScript).\n\n---\n\n### Características principales\n\n1. **Es anónima:** No requiere un nombre para ser declarada.\n2. **Sintaxis concisa:** Generalmente consta de una sola expresión (no múltiples líneas de código).\n3. **",
     "referencia": "Una función lambda es una función anónima pequeña y sin nombre definida con la palabra clave lambda.",
-    "precision": 0.1262135922330097,
-    "cobertura": 0.7647058823529411,
-    "f1": 0.21666666666666667
+    "precision": 0.14457831325301204,
+    "cobertura": 0.7058823529411765,
+    "f1": 0.24
   },
   {
     "consulta": "¿Qué es un framework?",
-    "respuesta": "Un **framework** (que se traduce al español como *marco de trabajo*) es una estructura prefabricada, un conjunto de herramientas, librerías y reglas que los desarrolladores utilizan como **base para crear programas o aplicaciones web de forma más rápida y eficiente**.\n\nEn lugar de escribir todo el código desde cero (\"reinventar la rueda\"), un framework te da el \"esqueleto\" de la aplicación para que tú solo tengas que programar las funciones específicas de tu proyecto.\n\n---\n\n### Una analogía sencilla: Construir una casa\n\n*   **Sin framework (Desde cero):** Tendrías que fabric",
+    "respuesta": "Un **framework** (que se traduce al español como *marco de trabajo*) es una estructura predefinida que los desarrolladores utilizan como base para crear software o aplicaciones. \n\nEn términos sencillos: **es como un \"esqueleto\" o una plantilla avanzada que ya trae resueltos los problemas más comunes**, permitiendo que los programadores se concentren en lo que hace única a su aplicación en lugar de",
     "referencia": "Un framework es un marco de trabajo que proporciona una estructura base para desarrollar aplicaciones de software.",
-    "precision": 0.16091954022988506,
-    "cobertura": 0.8235294117647058,
-    "f1": 0.2692307692307692
+    "precision": 0.24193548387096775,
+    "cobertura": 0.8823529411764706,
+    "f1": 0.379746835443038
   },
   {
     "consulta": "¿Qué es una API?",
-    "respuesta": "Una **API** (siglas en inglés de *Application Programming Interface*, que se traduce como **Interfaz de Programación de Aplicaciones**) es un conjunto de reglas y protocolos que **permite que dos aplicaciones o sistemas informáticos se comuniquen entre sí.**\n\nPara entenderlo de forma sencilla, piensa en una API como un **traductor o un mensajero** entre dos programas que no hablan el mismo idioma.\n\n---\n\n### La analogía del restaurante 🍽",
+    "respuesta": "Una **API** (del inglés *Application Programming Interface*, que se traduce como **Interfaz de Programación de Aplicaciones**) es un conjunto de reglas y protocolos que permite que **dos programas o aplicaciones informáticas se comuniquen entre sí**.\n\nPara entenderlo de forma sencilla",
     "referencia": "Una API es una interfaz de programación de aplicaciones que permite la comunicación entre diferentes sistemas de software.",
-    "precision": 0.23076923076923078,
-    "cobertura": 0.8333333333333334,
-    "f1": 0.3614457831325301
+    "precision": 0.3,
+    "cobertura": 0.6666666666666666,
+    "f1": 0.41379310344827586
   },
   {
     "consulta": "¿JSON?",
-    "respuesta": "**JSON** (que significa *JavaScript Object Notation* o Notación de Objetos de JavaScript) es un **formato de texto ligero utilizado para el intercambio de datos**.\n\nEn palabras sencillas, es una forma estándar de organizar la información para que las computadoras (servidores, aplicaciones, páginas web) puedan enviarse datos entre sí y entenderlos fácilmente.\n\n---\n\n### Características principales:\n1. **Fácil de leer:** Es legible tanto para humanos como para máquinas.\n2. **Independiente del lenguaje:** Nació de JavaScript, pero hoy en día casi **todos los lenguajes de programación** (Python, Java, PHP, C#, etc.) pueden leer y generar JSON.\n3. **Basado en texto:** Ocupa muy poco espacio y se transmite rápidamente",
+    "respuesta": "**JSON** significa **J**ava**S**cript **O**bject **N**otation (Notación de Objetos de JavaScript). \n\nEs el formato de texto más popular del mundo para **intercambiar datos** entre diferentes sistemas (por ejemplo, entre un servidor web y una aplicación móvil o una página web).\n\n---\n\n### ¿Para qué sirve?\nImagina que tienes una app en tu teléfono y quieres pedir la información de tu perfil al servidor. El servidor te responderá en formato JSON porque es un lenguaje universal que casi cualquier programa puede entender.\n\n### Ejemplo de JSON\nUn archivo JSON se ve así:\n\n```json\n{\n  \"nombre\": \"Carlos\",\n  \"edad\": 28,\n  \"esDesarrollador\": true,\n",
     "referencia": "JSON es un formato ligero de intercambio de datos basado en texto, fácil de leer y escribir para humanos y máquinas.",
-    "precision": 0.19230769230769232,
-    "cobertura": 0.9523809523809523,
-    "f1": 0.32
+    "precision": 0.13829787234042554,
+    "cobertura": 0.6190476190476191,
+    "f1": 0.22608695652173913
   },
   {
     "consulta": "¿Qué es SQL?",
-    "respuesta": "**SQL** (pronunciado \"ese-cu-ele\" o en inglés *\"sequel\"*) significa **Structured Query Language** (Lenguaje de Consulta Estructurado). \n\nEs el lenguaje de programación estándar utilizado para **almacenar, manipular, administrar y recuperar datos** en **bases de datos relacionales**.\n\nPara entenderlo de forma sencilla: si una base de datos fuera una gran biblioteca digital organizada en tablas (como hojas de Excel), **SQL es el idioma que usas para hablar con el bibliotecario** y pedirle información, añadir nuevos libros o modificar los existentes.\n\n---\n\n### ¿Para qué se usa SQL? (Operaciones principales)\n\nLas acciones básicas en SQL se resumen a menudo en el acrónimo **CRUD**:\n\n",
+    "respuesta": "**SQL** significa **Structured Query Language** (en español: *Lenguaje de Consulta Estructurado*). \n\nEs un lenguaje de programación estándar diseñado para **administrar, manipular y recuperar información almacenada en bases de datos relacionales**.\n\nPara entenderlo de forma sencilla: si una base de datos es un enorme archivo digital ordenado, **SQL es el idioma que utilizas para \"hablar\" con ese archivo** y pedirle o cambiar información.\n\n---\n\n### ¿Para qué se utiliza SQL?\n\nSQL se utiliza para realizar cuatro operaciones básicas (conocidas como **CRUD** por sus siglas en inglés):\n\n1. **Create (Crear):** Añadir nuevos datos o crear nuevas tablas.\n2. **Read (Leer/Consultar):** Buscar y extraer información específica de la base de datos.\n3. **Update (Actualizar",
     "referencia": "SQL es un lenguaje de consulta estructurado diseñado para administrar y consultar bases de datos relacionales.",
-    "precision": 0.13402061855670103,
-    "cobertura": 0.8125,
-    "f1": 0.23008849557522126
+    "precision": 0.13761467889908258,
+    "cobertura": 0.9375,
+    "f1": 0.24000000000000002
   },
   {
     "consulta": "¿Qué es Linux?",
-    "respuesta": "**Linux** es un sistema operativo libre y de código abierto, similar a Windows o macOS. Es el programa fundamental que administra el hardware de una computadora y permite que las aplicaciones (como navegadores web, juegos",
+    "respuesta": "**Linux** es un **sistema operativo** libre y de código abierto, similar a Windows o macOS. Es el programa fundamental que permite que el hardware de una computadora (procesador, memoria, disco duro) se comunique con los programas que usas (navegadores web, reproductores de música, editores de texto).\n\nAquí te explico",
     "referencia": "Linux es un sistema operativo de código abierto basado en Unix, muy utilizado en servidores y desarrollo backend.",
-    "precision": 0.2571428571428571,
+    "precision": 0.1836734693877551,
     "cobertura": 0.5,
-    "f1": 0.33962264150943394
+    "f1": 0.26865671641791045
   },
   {
     "consulta": "¿Qué es la recursividad?",
-    "respuesta": "La **recursividad** (o recursión) es un concepto fundamental en matemáticas e informática. En términos sencillos, la recursividad ocurre cuando **algo se define o se resuelve en función de",
+    "respuesta": "La **recursividad** (o recursión) es un concepto que se da cuando **algo se define en términos de sí mismo**. \n\nEn informática y programación, la recursividad ocurre cuando **una función se llama a sí misma** para resolver un problema dividiéndolo en versiones más pequeñas del mismo problema.\n\nPara entenderla de forma sencilla, imagínate que estás en una fila de cine y quieres saber en qué número de fila estás sentado, pero hay mucha gente delante de ti. \n1. Le preguntas a la persona que tienes **justo enfrente**: *\"¿En",
     "referencia": "La recursividad es una técnica de programación donde una función se llama a sí misma para resolver un problema.",
-    "precision": 0.25,
-    "cobertura": 0.3684210526315789,
-    "f1": 0.2978723404255319
+    "precision": 0.19540229885057472,
+    "cobertura": 0.8947368421052632,
+    "f1": 0.3207547169811321
   },
   {
     "consulta": "¿Qué es un bug?",
-    "respuesta": "En informática, un **bug** (traducido como \"error\" o \"fallo\") es un defecto, error o imperfección en el código de un programa informático o sistema de software que hace que este funcione de manera inesperada, produzca un resultado incorrecto o se colapse (se \"cuelgue\").\n\nAquí te explico los aspectos clave para entenderlo mejor:\n\n### 1. ¿Cómo se manifiesta un bug?\nUn bug puede causar desde molestias menores hasta problemas graves. Algunos ejemplos son:\n* **Visuales:** Un texto que se sobrepone a una imagen en una página web.\n* **Funcionales:** Haces clic en el botón de \"Enviar\" y no pasa nada.\n* **De rendimiento:** Una aplicación consume toda la memoria de tu teléfono y lo ralentiza.\n* **Críticos:** El juego o la aplicación se cierra de repente (*crash*).\n* **De seguridad:** Un fallo en el código que permite a los hackers acceder a datos privados (conocido como *vulnerabilidad*).\n\n###",
+    "respuesta": "En el ámbito de la informática y la tecnología, un **bug** (que en español se traduce literalmente como **\"bicho\"** o **\"insecto\"",
     "referencia": "Es un error, fallo o defecto en un programa de software que provoca un resultado inesperado.",
-    "precision": 0.1,
-    "cobertura": 0.875,
-    "f1": 0.17948717948717952
+    "precision": 0.23809523809523808,
+    "cobertura": 0.3125,
+    "f1": 0.27027027027027023
   }
 ]
