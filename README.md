@@ -34,11 +34,11 @@ plantilla-repositorio-base/
 │   └── trazas_rag.jsonl
 │
 ├── src/
-│   ├── agents/                         # Agentes y orquestación
+│   ├── agents/
 │   │   ├── agent.py
 │   │   └── agent_supervisor.py
 │   │
-│   ├── core/                           # Configuración, seguridad, métricas y componentes base
+│   ├── core/
 │   │   ├── client_api.py
 │   │   ├── client.py
 │   │   ├── config.py
@@ -52,7 +52,7 @@ plantilla-repositorio-base/
 │   │   ├── risks.py
 │   │   └── strategy.py
 │   │
-│   ├── pipelines/                      # Flujos RAG, tuning, supervisión y pruebas exploratorias
+│   ├── pipelines/
 │   │   ├── chains/
 │   │   │   ├── chain_3_steps.py
 │   │   │   └── router_chain.py
@@ -63,6 +63,7 @@ plantilla-repositorio-base/
 │   │   │   ├── try_dataset.py
 │   │   │   ├── try_decision.py
 │   │   │   ├── try_embeddings.py
+│   │   │   ├── try_ensayo_gate2.py
 │   │   │   ├── try_index.py
 │   │   │   ├── try_indexar_corpus.py
 │   │   │   ├── try_instrumentacion_rag.py
@@ -72,7 +73,7 @@ plantilla-repositorio-base/
 │   │   │   ├── try_strategy.py
 │   │   │   ├── try_tuning_costs.py
 │   │   │   └── try_tuning_stats.py
-│   │   │
+│   │
 │   │   ├── aprobar_prompt.py
 │   │   ├── costs_rag.py
 │   │   ├── dataset_tuning.py
@@ -84,7 +85,7 @@ plantilla-repositorio-base/
 │   │   ├── pipeline_clean_text.py
 │   │   └── trazabilidad_citas.py
 │   │
-│   ├── utils/                          # Observabilidad, seguridad, latencia y formato
+│   ├── utils/
 │   │   ├── check_trazas.py
 │   │   ├── formato_supervision.py
 │   │   ├── generate_report_md.py
@@ -93,18 +94,19 @@ plantilla-repositorio-base/
 │   │   ├── observability.py
 │   │   └── security.py
 │   │
-│   └── main.py                         # Punto de entrada principal
+│   └── main.py
 │
-├── tests/                              # Pruebas automáticas con pytest
+├── tests/
 │   ├── test_chain_3_steps.py
 │   ├── test_client.py
+│   ├── test_gate2.py
 │   ├── test_pipeline_clean.py
 │   ├── test_prompts_y_supervision.py
 │   └── test_router_chain.py
 │
-├── vectorstore/                        # Base vectorial persistente (ChromaDB)
-├── vectorstore_ejemplo/                # Base vectorial de ejemplo / pruebas
-├── .env.example                        # Variables de entorno de ejemplo
+├── vectorstore/
+├── vectorstore_ejemplo/
+├── .env.example
 ├── .gitignore
 ├── pyproject.toml
 ├── pytest.ini
@@ -193,6 +195,9 @@ python src/agents/agent_supervisor.py
 # Ejecutar flujo de aprobación/rechazo de prompts y matriz de riesgos
 python src/pipelines/demo_aprobar_prompt.py
 python src/pipelines/try/try_pasos_1_a_3.py
+
+# Ensayo integrado RAG, defensa contra prompt injection y trazabilidad
+python src/pipelines/try/try_ensayo_gate2.py
 ```
 
 ---
