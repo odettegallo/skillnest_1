@@ -100,4 +100,4 @@ Referencia de arquitectura: `docs/diagrama_arquitectura_CREDIA.png` (flujo de ev
 [PENDIENTE: se completa en el Bloque 34]
 
 ## 5. Plan de construcción por hitos
-[PENDIENTE: se completa en el Bloque 34]![alt text](image.png)
+[PENDIENTE: se completa en el Bloque 34]
