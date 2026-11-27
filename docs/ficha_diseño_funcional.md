@@ -97,12 +97,12 @@ Referencia de arquitectura: `docs/diagrama_arquitectura_CREDIA.png` (flujo de ev
 
 
 ## 4. Criterios de aceptación
-- CA-01 (RF-01): Al enviar una solicitud de evaluación crediticia simulada en JSON al endpoint, la respuesta es un JSON con indicadores y dictamen sugerido.
-- CA-02 (RF-02): Ante un caso simulado con liquidez, endeudamiento, deuda/EBITDA y DSCR definidos, el sistema calcula los cuatro ratios y asigna semáforo VERDE, AMARILLO o ROJO según las reglas internas.
-- CA-03 (RF-03): Al evaluar un caso simulado cubierto por las políticas internas, la respuesta cita al menos un documento de política crediticia de la base recuperada.
-- CA-04 (RF-04): Para una solicitud válida simulada, el sistema genera un borrador de memo de riesgo estructurado con los antecedentes del caso y las políticas citadas.
-- CA-05 (RF-05): Cuando al menos un indicador resulta en semáforo AMARILLO, el flujo detiene la aprobación automática y exige confirmación o justificación humana antes del dictamen final.
-- CA-06 (RF-06): Al abrir la interfaz web local conectada al servicio, se visualiza el estado de la solicitud, los semáforos y el borrador del memo.
+- CA-01 (RF-01): Al enviar una solicitud de evaluación crediticia simulada en JSON al endpoint, la respuesta es un JSON con al menos 4 indicadores y el campo "dictamen_sugerido".
+- CA-02 (RF-02): Ante un caso simulado con liquidez, endeudamiento, deuda/EBITDA y DSCR definidos, el sistema calcula los 4 ratios y asigna semáforo "VERDE", "AMARILLO" o "ROJO" según las reglas internas.
+- CA-03 (RF-03): Al evaluar un caso simulado cubierto por las políticas internas, la respuesta cita al menos 1 documento de política crediticia de la base recuperada.
+- CA-04 (RF-04): Para una solicitud válida simulada, el sistema genera un borrador de memo de riesgo estructurado con 4 secciones y las políticas citadas.
+- CA-05 (RF-05): Cuando al menos 1 indicador resulta en semáforo "AMARILLO", el flujo detiene la aprobación automática con estado "revision_humana_pendiente" y exige justificación o confirmación humana antes del dictamen final.
+- CA-06 (RF-06): Al abrir la interfaz web local conectada al servicio, se visualizan las 5 vistas o pantallas del flujo, los semáforos y el borrador del memo.
 - CA-07 (RNF-01): En 10 solicitudes de prueba, al menos 9 responden en menos de 8 segundos.
 - CA-08 (RNF-02): Tras 10 solicitudes de prueba, ninguna línea del registro JSONL expone datos sensibles completos ni el texto íntegro de los documentos, mostrando solo trace_id, longitudes y conteos.
 - CA-09 (RNF-03): Siguiendo el README desde cero en un contenedor, el servicio levanta y responde en menos de 10 minutos.
