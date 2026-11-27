@@ -13,6 +13,10 @@ PAQUETES_REQUERIDOS = [
     "langchain-core",
     "chromadb",
     "python-dotenv",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "httpx2",
 ]
 
 
