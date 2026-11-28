@@ -108,6 +108,7 @@ Referencia de arquitectura: `docs/diagrama_arquitectura_CREDIA.png` (flujo de ev
 - CA-09 (RNF-03): Siguiendo el README desde cero en un contenedor, el servicio levanta y responde en menos de 10 minutos.
 - CA-10 (RNF-04): En al menos 8 de 10 evaluaciones de prueba se cita la política correspondiente y se bloquean entradas con instrucciones maliciosas sin ejecutarlas.
 
+
 ## 5. Plan de construcción por hitos
 Horas disponibles: 20 h
 Margen de imprevistos: 4 h

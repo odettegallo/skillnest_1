@@ -29,3 +29,5 @@ vectorstore*
 
 checkpoints/
 checkpoints.db
+
+consulta.json
